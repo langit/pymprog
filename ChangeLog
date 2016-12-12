@@ -1,0 +1,46 @@
+12.12.2016: pymprog 1.0.0: production/stable release
+            new syntax for constraints
+            grouping constraints with group class
+            deleting variables/constraints
+            sensitivity report out of the box
+            switching dependence to swiglpk
+            supporting both Python 2 and 3
+            improved documentation
+            simpified installation with pip
+29.12.2009: pymprog 0.4.2: bug fix -- x <= None
+19.12.2009: pymprog 0.4.1: bug fix -- kind=bool
+            new examples and documentation update
+            pyglpk 0.3.3: cleaner set_kind
+07.11.2009: pymprog 0.4.0: performance boost 
+            (by using [] instead of {} for linexp.mat)
+25.9.2009: pymprog 0.3.1: Support for Mac OS X
+17.9.2009: pymprog 0.3.0: KKT condition and Environment access
+           integrated installation with pyglpk0.3.2
+06.9.2009: pymprog 0.2.3: rich solver options.
+27.8.2009: pymprog 0.2.2: test primal, dual values for constraints.
+16.6.2009: pymprog 0.2.1: new documentations, one small bug.
+15.6.2009: pymprog 0.2.0, everything is better
+           now supports parameterized bounds (auto update).
+	   now supports primal/dual values of constraints.
+	   80% of the codes are replaced! Crystal clear.
+	   now support st (a <= var <= b) or st (var == b).
+08.6.2009: pymprog 0.1.4, added mechanism to set options.
+           cleaned up direct access to glpk.LPX().
+	   start planning to support other solvers.
+	   added new methods to solve problems:
+	   exact, interior, advanced B&B.
+	   More general support of indices.
+09.5.2009: pymprog 0.1.3, maintanance code changes.
+           added example gassign2.py to illustrate
+	   new way of creating parameters.
+08.5.2009: pymprog 0.1.2, modelling interface enhancement
+           1. now you can specify variable types at
+	      variable creation (float, int, or bool),
+	      and variable bounds.
+	   2. now the par(val) is recursive, so it will
+	      take the structure of the given raw values
+	      in 'val', which can be a single int or float, 
+	      or a composition of list, tuple, dict, 
+	      or generator of ints and floats.
+17.4.2009: pymprog 0.1.1, added new example dynaqueens.py
+16.4.2009: initial release, pymprog 0.1
