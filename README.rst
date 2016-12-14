@@ -6,7 +6,7 @@ PyMathProg
 Description
 ~~~~~~~~~~~
 
-PyMathProg is a Python reincarnation of AMPL and GNU MathProg 
+PyMathProg is a pythonic reincarnation of AMPL and GNU MathProg 
 modeling language, implemented in pure Python, connecting to GLPK via 
 swiglpk. Create, optimize, report, change and re-optimize your model 
 with Python, easily integrate database, plotting, etc.
@@ -17,7 +17,7 @@ Optimization is done by open source optimization packages such as
 the *GNU Linear Programming Kit (GLPK)* that is made available
 to PyMathProg by swiglpk.
 
-The great features offered by PyMathProg include:
+Great features offered by PyMathProg include:
 
     - Ergonomic syntax for modelling 
     - Friendly interactive session
@@ -68,4 +68,4 @@ Help in the following ways are more than welcome:
 3. feature requests
 4. code contribution 
 
-I hope you will find it useful. Thank you! 
+I hope you will find it useful.

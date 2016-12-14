@@ -5,14 +5,17 @@
 Introduction to PyMathProg
 ##########################
 
+.. _whetting:
+
 Whetting your appetite
 ======================
 
 If you'd like to have a powerful linear program(LP) solver 
 wrapping around your little finger, then **PyMathProg** 
 is the thing for you. 
-Teaching LP with PyMathProg might also turn out to be 
-a pleasant experience.
+PyMathProg provides an easy and flexible modelling syntax
+using *Python* to create and optimize mathematical programming models. 
+It is kind of a reincarnation of AMPL and GNU MathProg in Python. 
 To illustrate, we will solve this tiny LP model here::
 
    maximize  15 x + 10 y         # profit
@@ -73,6 +76,7 @@ a model, even after solving it, for example:
 When we solve it again, the solver usually takes
 advantage of results from the latest solution.
 
+.. _dream:
 
 The Dream of PyMathProg
 =======================
@@ -99,6 +103,8 @@ And we may quickly get an answer to our questions by conducting
 small experiments, or test out some ideas that arise at the occasion. 
 Interactivity can make learning **PyMathProg** easy and fun.
 
+.. _features:
+
 Exciting new features
 ======================
 
@@ -120,6 +126,8 @@ made available to PyMathProg by swiglpk, which has enabled:
 - Support of the newest version of GLPK (v4.60)
 
 Therefore, this is indeed an exciting new version of **PyMathProg**!
+
+.. _compatability:
 
 A word on compatability
 =========================

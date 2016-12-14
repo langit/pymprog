@@ -17,10 +17,10 @@ from __future__ import print_function
    elements in all wrapped diagonals must be distinct."""
 
 from pymprog import *        # Import the module
-beginModel("picosudoku")
-I = xrange(1,10)
-J = xrange(1,10)
-K = xrange(1,10)
+begin("picosudoku")
+I = range(1,10)
+J = range(1,10)
+K = range(1,10)
 T = iprod(I,J,K) #create Indice tuples
 #x[i,j,k] = 1 means cell [i,j] is assigned number k 
 x = var('x', T, bool) #binary vars

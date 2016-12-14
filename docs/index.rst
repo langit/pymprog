@@ -5,9 +5,51 @@ Welcome to PyMathProg
 =====================
 
 This is the documentation for **PyMathProg**.
-PyMathProg makes modelling, solving, analyzing,
+PyMathProg is an easy and flexible mathematical programming 
+environment for Python. It makes modelling, solving, analyzing,
 modifying and manipulating linear programs 
 super easy and highly flexible in Python.
+
+Great features offered by PyMathProg include:
+
+    - Ergonomic syntax for modelling 
+    - Friendly interactive session
+    - Sensitivity report
+    - Advanced solver options
+    - Automatic model update on parameter changes
+    - Parameters sharable between models
+    - Deleting variables/constraints
+    - Supporting both Python 2 and 3
+    - Supporting all major platforms
+
+
+Quick installation
+==================
+
+::
+
+    pip install pymprog
+
+That's it. Since it is a pure Python project that only depends on swiglpk,
+it can be installed this way wherever swiglpk can be installed.
+Currently, swiglpk comes with binary wheels for Windows, Mac, and Linux.
+If you'd like to have PyMathProg installed on other platforms, 
+the only hurdle to overcome is to get swiglpk installed there first.
+
+Quick example
+===============
+
+Below is a small example taken from :ref:`whetting`::
+
+  from pymprog import *
+  begin('bike production')
+  x, y = var('x, y') # variables
+  maximize(15 * x + 10 * y, 'profit')
+  x <= 3 # mountain bike limit
+  y <= 4 # racer production limit
+  x + y <= 5 # metal finishing limit
+  solve()
+
 
 Getting Help
 ================
