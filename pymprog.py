@@ -337,6 +337,8 @@ class _bexp(_bnds):
     def update(me, m): #update row (usually before solve)
        if not me.id: return #deleted
        rex = me.expr.linearize()
+       assert type(rex) is _linexp,\
+              "Error: row degenerated to a constant."
        exprconst = rex.const
        bt, lo, hi = me.vbounds()
        lo -= exprconst #_linexp
@@ -826,6 +828,8 @@ class _obup(object):
        
    def update(me, m):
        expr = me.expr.linearize()
+       assert type(expr) is _linexp,\
+               "Error: objective degenerated to a constant."
        for i, c in expr.mat:
            m.set_obj_coef(i, c) 
        m.set_obj_coef(0, expr.const) #_linexp
