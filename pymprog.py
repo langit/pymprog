@@ -338,7 +338,7 @@ class _bexp(_bnds):
        if not me.id: return #deleted
        rex = me.expr.linearize()
        assert type(rex) is _linexp,\
-              "Error: row degenerated to a constant."
+              "Error: constraint has no variables."
        exprconst = rex.const
        bt, lo, hi = me.vbounds()
        lo -= exprconst #_linexp
@@ -829,7 +829,9 @@ class _obup(object):
    def update(me, m):
        expr = me.expr.linearize()
        assert type(expr) is _linexp,\
-               "Error: objective degenerated to a constant."
+          "Error: objective degenerated to a constant."
+       #if not isinstance(expr, _linexp):
+       #   return m.set_obj_coef(0, expr) #_linexp
        for i, c in expr.mat:
            m.set_obj_coef(i, c) 
        m.set_obj_coef(0, expr.const) #_linexp
@@ -1086,7 +1088,8 @@ class _linexp(object): #linear expressions
                mc.append(mb[b]); b += 1; continue
            if a<na and b<nb and ma[a][0] == mb[b][0]:
                v = ma[a][1]+mb[b][1]
-               if v: mc.append((ma[a][0], v))
+               #if v: mc.append((ma[a][0], v)) 
+               mc.append((ma[a][0], v)) #don't eliminate!
                a += 1; b += 1
        rex.const = me.const + be.const
        return rex
@@ -1098,7 +1101,7 @@ class _linexp(object): #linear expressions
    def __mul__(me, b):
        if type(b) not in (int, float):
           return NotImplemented
-       if not b: return b
+       #if not b: return b #don't eliminate!
        rex = _linexp()
        rex.const = me.const*b
        rex.mat = [(i,c*b) for i,c in me.mat]
