@@ -33,7 +33,9 @@ Great features offered by PyMathProg include:
 Installation
 ~~~~~~~~~~~~
 
-::
+Assuming you already have Python 2 or Python 3 installed, now open a
+terminal window (also known as a command window), and type in this 
+line of command and hit return::
 
     pip install pymprog
 
