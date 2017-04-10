@@ -1,0 +1,392 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>A Dive-in Tutorial &#8212; PyMathProg 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Working with variables" href="vars.html" />
+    <link rel="prev" title="Setup PyMathProg" href="setup.html" /> 
+  </head>
+  <body role="document">
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">PyMathProg 1.0 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="setup.html" title="Setup PyMathProg"
+             accesskey="P">previous</a> |
+          <a href="vars.html" title="Working with variables"
+             accesskey="N">next</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="a-dive-in-tutorial">
+<h1>A Dive-in Tutorial<a class="headerlink" href="#a-dive-in-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="a-dive-in-example">
+<span id="divin"></span><h2>A dive-in example<a class="headerlink" href="#a-dive-in-example" title="Permalink to this headline">¶</a></h2>
+<p>Suppose you have an easy linear program.
+A <em>3x3</em> matrix is given as the matrix for
+constraints, along with <em>2</em> vectors of
+length <em>3</em>, one for the objective function
+and the other for the right-hand-sides.
+You need to solve the problem and give
+a sensitivity report.
+This is very easy with PyMathProg:</p>
+<div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymprog</span> <span class="k">import</span> <span class="o">*</span> 
+<span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">A</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>     
+      <span class="p">(</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>   
+      <span class="p">(</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="p">]</span>   
+<span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<span class="n">begin</span><span class="p">(</span><span class="s1">&#39;basic&#39;</span><span class="p">)</span> <span class="c1"># begin modelling</span>
+<span class="n">verbose</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># be verbose</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="c1">#create 3 variables</span>
+<span class="n">maximize</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+  <span class="nb">sum</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> 
+<span class="n">solve</span><span class="p">()</span> <span class="c1"># solve the model</span>
+<span class="n">sensitivity</span><span class="p">()</span> <span class="c1"># sensitivity report</span>
+<span class="n">end</span><span class="p">()</span> <span class="c1">#Good habit: do away with the model</span>
+</pre></div>
+</td></tr></table></div>
+<p>The code is quite straight-forward.
+Note there are three basic building blocks:
+it starts with a data block, followed by a model
+block, and finished with a report block.</p>
+<ol class="arabic">
+<li><p class="first"><strong>Data block (lines 2-6):</strong></p>
+<p>The matrix and the vectors are defined.
+Of course, you can also read data from
+some external database, as Python can do that easily.</p>
+</li>
+<li><p class="first"><strong>Model block (lines 7-12):</strong></p>
+<p>It all starts by a function <code class="docutils literal"><span class="pre">begin(name)</span></code> on line 7.
+It creates a new model instance  with the given name
+for later modelling steps to build upon.
+It is also possible to handle the
+model directly, we will come to that later.</p>
+<p>Line 8 turns on the verbosity option, which enables
+PyMathProg to provide feedbacks on each building step.</p>
+<p>Line 9 defines the three variables and organize them in a list:
+you simply provide the name for the group, and the number of
+variables to create, which is 3 in this case. By default,
+these variables are continuous and non-negative.</p>
+<p>Line 10 defines the objective: maximize the summation
+of the terms b[i]*x[i], where i goes from 0 to 3.</p>
+<p>Lines 11-12 define the constraints with a for loop.</p>
+<p>That&#8217;s it for modelling. Now the code moves on to</p>
+</li>
+<li><p class="first"><strong>Report block (lines 13-15):</strong></p>
+<p>Line 13 issues a call <em>solve()</em> to solve the model.</p>
+<p>Line 14 produces the sensitivity report.</p>
+<p>Finally, line 15 calls the function <em>end()</em> to do away
+with the model.</p>
+</li>
+</ol>
+<p>And here is the output (with the verbosity turned on):</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>Max : 10 * x[0] + 6 * x[1] + 4 * x[2]
+R1: x[0] + x[1] + x[2] &lt;= 10
+R2: 9 * x[0] + 4 * x[1] + 5 * x[2] &lt;= 60
+R3: 2 * x[0] + 2 * x[1] + 6 * x[2] &lt;= 30
+GLPK Simplex Optimizer, v4.60
+3 rows, 3 columns, 9 non-zeros
+*     0: obj =  -0.000000000e+00 inf =   0.000e+00 (3)
+*     2: obj =   7.600000000e+01 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+
+PyMathProg 1.0 Sensitivity Report Created: 2016/12/08 Thu 12:55PM
+================================================================================
+Variable            Activity   Dual.Value     Obj.Coef   Range.From   Range.Till
+--------------------------------------------------------------------------------
+*x[0]                      4            0           10            6         13.5
+*x[1]                      6            0            6      4.44444           10
+ x[2]                      0         -2.8            4         -inf          6.8
+================================================================================
+Note: rows marked with a * list a basic variable.
+
+================================================================================
+Constraint       Activity Dual.Value  Lower.Bnd  Upper.Bnd RangeLower RangeUpper
+--------------------------------------------------------------------------------
+ R1                    10        2.8       -inf         10    6.66667         15
+ R2                    60        0.8       -inf         60         40         90
+*R3                    20          0       -inf         30         20         20
+================================================================================
+Note: normally, RangeLower is the min for the binding bound, and RangeUpper
+gives the max value. However, when neither bounds are binding, the row is
+marked with a *, and RangeLower is the max for Lower.Bnd(whose min is -inf),
+and RangeUpper is the min for Upper.Bnd(whose max value is inf). Then the
+columns of RangeLower, RangeUpper and Activity all have identical values.
+
+__del__ is deleting problem: basic
+</pre></div>
+</div>
+</div>
+<div class="section" id="a-parallel-example">
+<span id="parallel"></span><h2>A parallel example<a class="headerlink" href="#a-parallel-example" title="Permalink to this headline">¶</a></h2>
+<p>In the previous example, we use global functions to create and manipulate
+a default model &#8211; we did not directly handle it. PyMathProg also provides
+a way of direct handling of the model, as demonstrated by the code below
+that does exactly the same thing as before:</p>
+<div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymprog</span> <span class="k">import</span> <span class="n">model</span> 
+<span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">A</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>     
+      <span class="p">(</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>   
+      <span class="p">(</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="p">]</span>   
+<span class="n">b</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="s1">&#39;basic&#39;</span><span class="p">)</span>  
+<span class="n">p</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> 
+<span class="n">p</span><span class="o">.</span><span class="n">maximize</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+  <span class="nb">sum</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> 
+<span class="n">p</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span> <span class="c1"># solve the model</span>
+<span class="n">p</span><span class="o">.</span><span class="n">sensitivity</span><span class="p">()</span> <span class="c1"># sensitivity report</span>
+<span class="n">p</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+<p>Clearly, there is a line to line correspondence to the previous code.
+In the first line, this code only imports <em>model</em> from pymprog. Then
+on line 7, instead of call <code class="docutils literal"><span class="pre">begin(.)</span></code>, this code uses <code class="docutils literal"><span class="pre">p=model(.)</span></code>
+to create a new model instance. From then on, each function call is
+converted into a method invocation on the created model instance.</p>
+</div>
+<div class="section" id="zero-sum-two-player-game">
+<span id="game2p"></span><h2>Zero-sum Two-player Game<a class="headerlink" href="#zero-sum-two-player-game" title="Permalink to this headline">¶</a></h2>
+<p>This example is employed to show the use
+of the &#8216;primal&#8217; and &#8216;dual&#8217; values.
+A zero-sum two-player game is a game
+between two players, where the gain
+of one player is the loss of the other,
+hence their pay-offs always sums up to zero.
+The value <em>a[i,j]</em> is the pay-off for player one
+when player one plays strategy <em>i</em> and
+player two plays strategy <em>j</em>.
+Here is an LP formulation to find the
+equilibrium mixed strategies and the value
+of the game.</p>
+<div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymprog</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="c1">#####Solve this 2-player zero-sum game:</span>
+<span class="c1">##</span>
+<span class="c1">##     Gain for player 1 </span>
+<span class="c1">##    (Loss for player 2)</span>
+<span class="c1">##   </span>
+<span class="c1">##            ||  Player  2</span>
+<span class="c1">##   Player 1 ||  B1     B2</span>
+<span class="c1">##      A1    ||  5      9</span>
+<span class="c1">##      A2    ||  8      6</span>
+<span class="c1">##</span>
+<span class="c1">##############################</span>
+
+<span class="n">begin</span><span class="p">(</span><span class="s1">&#39;game&#39;</span><span class="p">)</span>
+<span class="c1"># gain of player 1, a free variable</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">&#39;game_value&#39;</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">))</span>
+<span class="c1"># mixed strategy of player 2</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> 
+<span class="c1"># probability sums to 1</span>
+<span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="c1"># player 2 chooses p to minimize v</span>
+<span class="n">minimize</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> 
+<span class="c1"># player 1 chooses the better value </span>
+<span class="n">r1</span> <span class="o">=</span>  <span class="n">v</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">9</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> 
+<span class="n">r2</span> <span class="o">=</span>  <span class="n">v</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">6</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">solve</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Game value: </span><span class="si">%g</span><span class="s1">&#39;</span><span class="o">%</span> <span class="n">v</span><span class="o">.</span><span class="n">primal</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mixed Strategy for player 1:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;A1: </span><span class="si">%g</span><span class="s2">, A2: </span><span class="si">%g</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">r1</span><span class="o">.</span><span class="n">dual</span><span class="p">,</span> <span class="n">r2</span><span class="o">.</span><span class="n">dual</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mixed Strategy for player 2:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;B1: </span><span class="si">%g</span><span class="s2">, B2: </span><span class="si">%g</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">primal</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">primal</span><span class="p">))</span>
+<span class="n">end</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+<p>In this block of code, two variables <em>r1</em>
+and <em>r2</em> are employed to save the constraints
+for the sake of reporting. Note that in this
+model, the <em>primal</em> value of the variables gives
+the probability for player 2&#8217;s mixed strategy,
+and the <em>dual</em> value of the constraints <em>r1</em> and <em>r2</em>
+gives the mixed strategy of player 1.
+And the output is as follows:</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>GLPK Simplex Optimizer, v4.60
+3 rows, 3 columns, 8 non-zeros
+    0: obj =   0.000000000e+00 inf =   1.000e+00 (1)
+    3: obj =   7.000000000e+00 inf =   0.000e+00 (0)
+OPTIMAL LP SOLUTION FOUND
+Game value: 7
+Mixed Strategy for player 1:
+A1: 0.333333, A2: 0.666667
+Mixed Strategy for player 2:
+B1: 0.5, B2: 0.5
+</pre></div>
+</div>
+<p>Hope this dive-in tutorial has served to give you the
+basic idea of how PyMathProg works. Before working on
+more advanced examples, please read on!</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction to PyMathProg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup PyMathProg</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">A Dive-in Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#a-dive-in-example">A dive-in example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-parallel-example">A parallel example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#zero-sum-two-player-game">Zero-sum Two-player Game</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vars.html">Working with variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indices.html">Working with Indices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pars.html">Working with parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constr.html">Working with Constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solvopt.html">Using Solver Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">More Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="subtour.html">Case: Subtour Elimination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix: Installing MinGW on Windows</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="setup.html" title="Setup PyMathProg"
+              >previous</a> |
+            <a href="vars.html" title="Working with variables"
+              >next</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/tutorial.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Yingjie Lan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

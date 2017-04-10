@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Using Solver Options &#8212; PyMathProg 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Miscellaneous functions" href="misc.html" />
+    <link rel="prev" title="Working with Constraints" href="constr.html" /> 
+  </head>
+  <body role="document">
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">PyMathProg 1.0 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="constr.html" title="Working with Constraints"
+             accesskey="P">previous</a> |
+          <a href="misc.html" title="Miscellaneous functions"
+             accesskey="N">next</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="using-solver-options">
+<h1>Using Solver Options<a class="headerlink" href="#using-solver-options" title="Permalink to this headline">¶</a></h1>
+<p>Currently, there are four solvers available for use,
+and each solver comes with a set of options for
+the parameters that control its behavior.
+Use the global function <em>solver(...)</em>
+to select the solver for your model,
+and to set the desired options for the
+chosen solver.</p>
+<div class="section" id="setting-getting-options">
+<span id="setgetopt"></span><h2>Setting/getting options<a class="headerlink" href="#setting-getting-options" title="Permalink to this headline">¶</a></h2>
+<p>The four solvers available for use are
+each given a name: &#8216;simplex&#8217;, &#8216;exact&#8217;, &#8216;interior&#8217;,
+and &#8216;intopt&#8217;. Note that the first three
+are good for solving linear programs, whereas the
+last (&#8216;intopt&#8217;) is good for solving integer programs.
+That means we only have choices (at least for now)
+when we have a linear program to solve.
+To select a particular solver, just do:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="p">(</span><span class="s1">&#39;interior&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>That would set &#8216;interior&#8217; solver as the solver for linear programming.
+You may also provide options at the same time:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="p">(</span><span class="s1">&#39;interior&#39;</span><span class="p">,</span> <span class="n">msg_lev</span><span class="o">=</span><span class="n">glpk</span><span class="o">.</span><span class="n">GLP_MSG_OFF</span><span class="p">)</span>
+<span class="go">{&#39;msg_lev&#39;: 0}</span>
+</pre></div>
+</div>
+<p>which would turn off message output from the solver,
+and return the current values for options explicitly set.
+For options whose value is not set, they would take the default value.
+For information on what options and values are available for a
+particular solver, try something like this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="p">(</span><span class="n">help</span> <span class="o">=</span> <span class="s1">&#39;interior&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To find out which solver will be used for linear programming:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+<span class="go">&#39;simplex&#39;</span>
+</pre></div>
+</div>
+<p>To find out which solver will be used for integer programming:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="go">&#39;intopt&#39;</span>
+</pre></div>
+</div>
+<p>To set options on one of the default solvers, for example, use</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">br_tech</span><span class="o">=</span><span class="n">glpk</span><span class="o">.</span><span class="n">GLP_BR_PCH</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>to select the hybrid pseudo-cost heuristic(PCH)
+branching technique for the integer optimizer.</p>
+</div>
+<div class="section" id="deleting-an-option">
+<span id="delopts"></span><h2>Deleting an option<a class="headerlink" href="#deleting-an-option" title="Permalink to this headline">¶</a></h2>
+<p>To delete an option, simply set it to <em>None</em>.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">solver</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">msg_lev</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This would delete the explicit value for the &#8216;msg_lev&#8217; option,
+and leave it at its default value.</p>
+<p>Note: if you need to warm start your simplex method
+(that is, start the simplex method with the optimal
+basis from your last invocation, which is often used
+when employing row generation and/or column generation),
+please don&#8217;t turn on the &#8216;presolve&#8217; option.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction to PyMathProg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup PyMathProg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">A Dive-in Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vars.html">Working with variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indices.html">Working with Indices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pars.html">Working with parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constr.html">Working with Constraints</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using Solver Options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#setting-getting-options">Setting/getting options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#deleting-an-option">Deleting an option</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">More Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="subtour.html">Case: Subtour Elimination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix: Installing MinGW on Windows</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="constr.html" title="Working with Constraints"
+              >previous</a> |
+            <a href="misc.html" title="Miscellaneous functions"
+              >next</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/solvopt.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Yingjie Lan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

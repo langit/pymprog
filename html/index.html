@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to PyMathProg &#8212; PyMathProg 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction to PyMathProg" href="intro.html" /> 
+  </head>
+  <body role="document">
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="#">PyMathProg 1.0 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="intro.html" title="Introduction to PyMathProg"
+             accesskey="N">next</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-pymathprog">
+<h1>Welcome to PyMathProg<a class="headerlink" href="#welcome-to-pymathprog" title="Permalink to this headline">¶</a></h1>
+<p>This is the documentation for <strong>PyMathProg</strong>.
+PyMathProg is an easy and flexible mathematical programming
+environment for Python. It makes modelling, solving, analyzing,
+modifying and manipulating linear programs
+super easy and highly flexible in Python.</p>
+<p>Great features offered by PyMathProg include:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Ergonomic syntax for modelling</li>
+<li>Friendly interactive session</li>
+<li>Sensitivity report</li>
+<li>Advanced solver options</li>
+<li>Automatic model update on parameter changes</li>
+<li>Parameters sharable between models</li>
+<li>Deleting variables/constraints</li>
+<li>Supporting both Python 2 and 3</li>
+<li>Supporting all major platforms</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="quick-installation">
+<h1>Quick installation<a class="headerlink" href="#quick-installation" title="Permalink to this headline">¶</a></h1>
+<p>Assuming you already have Python 2 or Python 3 installed, now open a
+terminal window (also known as a command window), and type in this
+line of command and hit return:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pymprog</span>
+</pre></div>
+</div>
+<p>That&#8217;s it! In a couple of minutes it will download the necessary packages
+and install them, and you should be all set.
+Since pymprog is a pure Python project that only depends on swiglpk,
+it can be installed this way wherever swiglpk can be installed.
+Currently, swiglpk comes with binary wheels for Windows, Mac, and Linux.
+If you&#8217;d like to have pymprog installed on other exotic platforms,
+the only hurdle to overcome is to get swiglpk installed there first.</p>
+</div>
+<div class="section" id="quick-example">
+<h1>Quick example<a class="headerlink" href="#quick-example" title="Permalink to this headline">¶</a></h1>
+<p>Below is a small example taken from <a class="reference internal" href="intro.html#whetting"><span class="std std-ref">Whetting your appetite</span></a>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymprog</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">begin</span><span class="p">(</span><span class="s1">&#39;bike production&#39;</span><span class="p">)</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">&#39;x, y&#39;</span><span class="p">)</span> <span class="c1"># variables</span>
+<span class="n">maximize</span><span class="p">(</span><span class="mi">15</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;profit&#39;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">3</span> <span class="c1"># mountain bike limit</span>
+<span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">4</span> <span class="c1"># racer production limit</span>
+<span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">5</span> <span class="c1"># metal finishing limit</span>
+<span class="n">solve</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="getting-help">
+<h1>Getting Help<a class="headerlink" href="#getting-help" title="Permalink to this headline">¶</a></h1>
+<p>There are several ways to get some help:</p>
+<ol class="arabic simple">
+<li>Project homepage: <a class="reference external" href="http://pymprog.sf.net/">http://pymprog.sf.net/</a></li>
+<li>Email list: <a class="reference external" href="https://lists.sourceforge.net/mailman/listinfo/pymprog-help">https://lists.sourceforge.net/mailman/listinfo/pymprog-help</a></li>
+<li>Forum: <a class="reference external" href="https://sourceforge.net/forum/forum.php?forum_id=942151">https://sourceforge.net/forum/forum.php?forum_id=942151</a></li>
+</ol>
+<p align=center> More PyMathProg resources at
+<a href="http://sourceforge.net/projects/pymprog/" target=_parent>
+<img src="http://sflogo.sourceforge.net/sflogo.php?group_id=259552&amp;type=11"
+width="120" height="30" border="0" alt="SourceForge.net Logo" /></a></p></div>
+<div class="section" id="contents">
+<h1>Contents:<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction to PyMathProg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#whetting-your-appetite">Whetting your appetite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#the-dream-of-pymathprog">The Dream of PyMathProg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#exciting-new-features">Exciting new features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#a-word-on-compatability">A word on compatability</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup PyMathProg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="setup.html#setup-latest-version">Setup Latest Version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup.html#alternative-ways">Alternative ways</a></li>
+<li class="toctree-l2"><a class="reference internal" href="setup.html#setup-old-versions">Setup OLD versions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">A Dive-in Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#a-dive-in-example">A dive-in example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#a-parallel-example">A parallel example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#zero-sum-two-player-game">Zero-sum Two-player Game</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vars.html">Working with variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vars.html#creating-variables">Creating variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vars.html#change-bounds-and-kind">Change bounds and kind</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="indices.html">Working with Indices</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="indices.html#natural-indices">Natural indices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="indices.html#combined-indices">Combined indices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="indices.html#use-index-with-variables">Use index with variables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pars.html">Working with parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pars.html#creating-parameters">Creating parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pars.html#changing-the-value">Changing the value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pars.html#an-example-for-value-change">An example for value change</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="constr.html">Working with Constraints</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="constr.html#with-a-single-comparison">With a single comparison</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constr.html#with-double-comparisons">With double comparisons</a></li>
+<li class="toctree-l2"><a class="reference internal" href="constr.html#grouping-constraints">Grouping constraints</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="solvopt.html">Using Solver Options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="solvopt.html#setting-getting-options">Setting/getting options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="solvopt.html#deleting-an-option">Deleting an option</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="misc.html#deleting-model-elements">Deleting model elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="misc.html#saving-model-and-solution">Saving model and solution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="misc.html#karush-kuhn-tucker-conditions">Karush-Kuhn-Tucker conditions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">More Advanced Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#re-optimize-the-assignment">Re-optimize the assignment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#interaction-with-queens">Interaction with queens</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#the-traveling-sales-man-tsp">The traveling sales man(TSP)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#zebra-using-string-as-index">Zebra: using string as index</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#magic-numbers">Magic numbers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#sudoku-want-some-ai">Sudoku: want some AI?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#super-sudoku">Super Sudoku</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#machine-scheduling">Machine Scheduling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="advanced.html#scheduling-for-revenue">Scheduling for Revenue</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="subtour.html">Case: Subtour Elimination</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="subtour.html#brief-introduction">Brief Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="subtour.html#subtour-elimination">Subtour Elimination</a></li>
+<li class="toctree-l2"><a class="reference internal" href="subtour.html#implementation">Implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix: Installing MinGW on Windows</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction to PyMathProg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup PyMathProg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">A Dive-in Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vars.html">Working with variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indices.html">Working with Indices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pars.html">Working with parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constr.html">Working with Constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solvopt.html">Using Solver Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">More Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="subtour.html">Case: Subtour Elimination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix: Installing MinGW on Windows</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="intro.html" title="Introduction to PyMathProg"
+              >next</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/index.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Yingjie Lan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

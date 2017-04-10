@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction to PyMathProg &#8212; PyMathProg 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Setup PyMathProg" href="setup.html" />
+    <link rel="prev" title="Welcome to PyMathProg" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="index.html">PyMathProg 1.0 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="index.html" title="Welcome to PyMathProg"
+             accesskey="P">previous</a> |
+          <a href="setup.html" title="Setup PyMathProg"
+             accesskey="N">next</a> |
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction-to-pymathprog">
+<h1>Introduction to PyMathProg<a class="headerlink" href="#introduction-to-pymathprog" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="whetting-your-appetite">
+<span id="whetting"></span><h2>Whetting your appetite<a class="headerlink" href="#whetting-your-appetite" title="Permalink to this headline">¶</a></h2>
+<p>If you&#8217;d like to have a powerful linear program(LP) solver
+wrapping around your little finger, then <strong>PyMathProg</strong>
+is the thing for you.
+PyMathProg provides an easy and flexible modelling syntax
+using <em>Python</em> to create and optimize mathematical programming models.
+It is kind of a reincarnation of AMPL and GNU MathProg in Python.
+To illustrate, we will solve this tiny LP model here:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">maximize</span>  <span class="mi">15</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">10</span> <span class="n">y</span>         <span class="c1"># profit</span>
+<span class="n">S</span><span class="o">.</span><span class="n">T</span><span class="o">.</span>
+             <span class="n">x</span>         <span class="o">&lt;=</span>  <span class="mi">3</span>  <span class="c1"># mountain bike limit</span>
+                    <span class="n">y</span>  <span class="o">&lt;=</span>  <span class="mi">4</span>  <span class="c1"># racer limit</span>
+             <span class="n">x</span> <span class="o">+</span>    <span class="n">y</span>  <span class="o">&lt;=</span>  <span class="mi">5</span>  <span class="c1"># frame limit</span>
+             <span class="n">x</span> <span class="o">&gt;=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y</span> <span class="o">&gt;=</span><span class="mi">0</span>     <span class="c1"># non-negative</span>
+</pre></div>
+</div>
+<p>Believed it or not, we can almost literally transcribe it
+into PyMathProg as follows:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pymprog</span> <span class="k">import</span> <span class="o">*</span>
+<span class="n">begin</span><span class="p">(</span><span class="s1">&#39;bike production&#39;</span><span class="p">)</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">&#39;x, y&#39;</span><span class="p">)</span> <span class="c1"># variables</span>
+<span class="n">maximize</span><span class="p">(</span><span class="mi">15</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;profit&#39;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">3</span> <span class="c1"># mountain bike limit</span>
+<span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">4</span> <span class="c1"># racer production limit</span>
+<span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">5</span> <span class="c1"># metal finishing limit</span>
+<span class="n">solve</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>For now, let&#8217;s fire up an interactive python session, maybe in a
+terminal or a Python IDLE window, and try it all out like this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pymprog</span> <span class="k">import</span> <span class="o">*</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">begin</span><span class="p">(</span><span class="s1">&#39;bike production&#39;</span><span class="p">)</span>
+<span class="go">model(&#39;bikes production&#39;) is the default model.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">var</span><span class="p">(</span><span class="s1">&#39;x, y&#39;</span><span class="p">)</span> <span class="c1"># create variables</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="c1"># take a look at them</span>
+<span class="go">(0 &lt;= x continuous, 0 &lt;= y continuous)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">maximize</span><span class="p">(</span><span class="mi">15</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">10</span><span class="o">*</span><span class="n">y</span><span class="p">,</span> <span class="s1">&#39;profit&#39;</span><span class="p">)</span>
+<span class="go">Max profit: 15 * x + 10 * y</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">&lt;=</span> <span class="mi">3</span>
+<span class="go">0 &lt;= x &lt;= 3 continuous</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">4</span>
+<span class="go">0 &lt;= y &lt;= 4 continuous</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="mi">5</span>
+<span class="go">R1: x + y &lt;= 5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">solve</span><span class="p">()</span>
+<span class="go">GLPK Simplex Optimizer, v4.60</span>
+<span class="go">1 row, 2 columns, 2 non-zeros</span>
+<span class="go">*     0: obj =  -0.000000000e+00 inf =   0.000e+00 (2)</span>
+<span class="go">*     2: obj =   6.500000000e+01 inf =   0.000e+00 (0)</span>
+<span class="go">OPTIMAL LP SOLUTION FOUND</span>
+</pre></div>
+</div>
+<p>That&#8217;s just the beginning. A lot of more sophisticated
+examples are included in other parts of this documentation.
+We can also do many other interesing things to
+a model, even after solving it, for example:</p>
+<ul class="simple">
+<li>Conduct sensitivity analysis</li>
+<li>Change the value of a parameter</li>
+<li>Fix a variable to an arbitrary value</li>
+<li>Manage the bounds of a variable or constraint</li>
+<li>Change the type of a variable</li>
+<li>Adding/deleting variables or constraints</li>
+</ul>
+<p>When we solve it again, the solver usually takes
+advantage of results from the latest solution.</p>
+</div>
+<div class="section" id="the-dream-of-pymathprog">
+<span id="dream"></span><h2>The Dream of PyMathProg<a class="headerlink" href="#the-dream-of-pymathprog" title="Permalink to this headline">¶</a></h2>
+<p>The dream of <strong>PyMathProg</strong> is to do math programming in <em>Python</em>
+with ease and flexibility,  to create, optimize, report,
+change and re-optimize your model without breaking a sweat.
+To make that dream come true, a few things are essential:</p>
+<ul class="simple">
+<li>a good modelling language, and we&#8217;ve got Python</li>
+<li>a powerful and flexible solver, and there is GLPK</li>
+<li>an integrated toolset, with database, plotting, etc.</li>
+<li>an interactive modelling enviromment for easy learning</li>
+</ul>
+<p>and for the last two, the answer is stiell &#8220;we&#8217;ve got Python&#8221;.
+Being embedded in Python, you can take advantage of all the good
+stuff available in Python: such as easy database access,
+graphical presentation of your solution, statistical analysis,
+or use pymprog for artificial intelligence in games, etc.
+Interactive sessions enable us to get immediate feedback for
+each small step we take. We can also conveniently obtain help
+right within the session by using the &#8216;help(.)&#8217; function.
+And we may quickly get an answer to our questions by conducting
+small experiments, or test out some ideas that arise at the occasion.
+Interactivity can make learning <strong>PyMathProg</strong> easy and fun.</p>
+</div>
+<div class="section" id="exciting-new-features">
+<span id="features"></span><h2>Exciting new features<a class="headerlink" href="#exciting-new-features" title="Permalink to this headline">¶</a></h2>
+<p>Exciting new freatures offered by PyMathProg <em>v1.0</em> are as follows:</p>
+<ul class="simple">
+<li>New syntax to make modelling easy and intuitive</li>
+<li>Sensitivity analysis report</li>
+<li>Deletion of variables/constraints</li>
+<li>Improved solver options</li>
+<li>Friendly interactive session</li>
+<li>Arbitrary parameter changes update model automatically</li>
+<li>Parameters can be shared among many models</li>
+</ul>
+<p>The underlying solver is still GLPK, but now it is
+made available to PyMathProg by swiglpk, which has enabled:</p>
+<ul class="simple">
+<li>Super easy setup of PyMathProg with one single command</li>
+<li>Support of both Python 2 and 3</li>
+<li>Support of the newest version of GLPK (v4.60)</li>
+</ul>
+<p>Therefore, this is indeed an exciting new version of <strong>PyMathProg</strong>!</p>
+</div>
+<div class="section" id="a-word-on-compatability">
+<span id="compatability"></span><h2>A word on compatability<a class="headerlink" href="#a-word-on-compatability" title="Permalink to this headline">¶</a></h2>
+<p>This new version (<em>v1.0</em>) of PyMathProg is <em>fully compatable</em>
+with previous versions. However, some functions are deprecated and
+won&#8217;t be fully supported in futre versions. Here is a list of them:</p>
+<ul class="simple">
+<li>var(.) now takes the name of variable(s) as the first argument</li>
+<li>par(.) now takes the name of parameter(s) as the first argument</li>
+<li>beginModel(.) is simplified into begin(.)</li>
+<li>endModel(.) is simplified into end(.)</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction to PyMathProg</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#whetting-your-appetite">Whetting your appetite</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-dream-of-pymathprog">The Dream of PyMathProg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#exciting-new-features">Exciting new features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#a-word-on-compatability">A word on compatability</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setup PyMathProg</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">A Dive-in Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vars.html">Working with variables</a></li>
+<li class="toctree-l1"><a class="reference internal" href="indices.html">Working with Indices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pars.html">Working with parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="constr.html">Working with Constraints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solvopt.html">Using Solver Options</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Miscellaneous functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="advanced.html">More Advanced Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="subtour.html">Case: Subtour Elimination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix.html">Appendix: Installing MinGW on Windows</a></li>
+</ul>
+
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="index.html" title="Welcome to PyMathProg"
+              >previous</a> |
+            <a href="setup.html" title="Setup PyMathProg"
+              >next</a> |
+            <a href="genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+              <br/>
+              <a href="_sources/intro.rst.txt"
+                rel="nofollow">Show Source</a>
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Yingjie Lan.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
