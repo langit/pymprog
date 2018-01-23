@@ -10,7 +10,7 @@ with open('README.rst') as readme:
     ld = readme.read()
 
 setup(name = 'pymprog',
-      version = '1.0.0',
+      version = '1.1.1',
       description = 'An easy and flexible mathematical programming environment for Python',
       long_description = ld,
       author = 'Yingjie Lan',

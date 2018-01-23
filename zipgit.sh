@@ -7,4 +7,4 @@ make html
 cd _build
 zip -r $ZIPF html
 echo $ZIPF
-#scp $ZIPF lanyjie@frs.sourceforge.net:/home/frs/project/p/py/pymprog/pymprog-1.0/pymprog-1.0.0.zip
+#scp $ZIPF lanyjie@frs.sourceforge.net:/home/frs/project/p/py/pymprog/pymprog-1.0/pymprog-1.1.1.zip

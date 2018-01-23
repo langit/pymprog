@@ -18,14 +18,16 @@
 #This file is part of PyMathProg.
 #Author: Yingjie Lan, Email: ylan@pku.edu.cn
 
-#### { for both python 2 and 3 
+#### { for both python 2 and 3
 #Cheat Sheet: Writing Python 2-3 compatible code
 #http://python-future.org/compatible_idioms.html
 #>>>Minimum versions
 #     * Python 2: 2.6+
 #     * Python 3: 3.3+
 #from __future__ import division #since 2.2
-from __future__ import print_function 
+from __future__ import print_function
+
+mprog_version = '1.1.1'
 
 #from past.builtins import long
 import sys
@@ -40,7 +42,7 @@ def _with_metaclass(mcls):
         body.pop('__weakref__', None)
         return mcls(cls.__name__, cls.__bases__, body)
     return decorator
-   
+
 #### for both python 2 and 3 }
 
 try: import swiglpk as glpk
@@ -59,7 +61,7 @@ a package installation tool for python.
     sys.exit(1)
 
 ##### Utility functions ####
- 
+
 def evaluate(expr):
    """return the value of an expression
 when all its variables take their primal values."""
@@ -79,7 +81,7 @@ def subscript(t, top=True):
 
 ####### Class Definitions ####
 class group(object):
-    '''a holder to hold a group of constraints. 
+    '''a holder to hold a group of constraints.
 it uses __setitem__ to accomplish two things at one time:
 1. hold an object by the index
 2. use the index to set a name for the constraint
@@ -90,7 +92,7 @@ it uses __setitem__ to accomplish two things at one time:
         me.dict = {}
 
     def description(me, *index):
-        return me.templ.format(*index, 
+        return me.templ.format(*index,
             name=me.name(*index)) if me.templ else None
     desc = description #alternative method name
 
@@ -98,8 +100,8 @@ it uses __setitem__ to accomplish two things at one time:
         return '%s[%s]'%(me.group, subscript(index))
 
     def __setitem__(me, index, e):
-        assert isinstance(e, _cons) 
-        e.name = me.name(*index) if isinstance(index, 
+        assert isinstance(e, _cons)
+        e.name = me.name(*index) if isinstance(index,
             tuple) else me.name(index)
         me.dict[index] = e
 
@@ -111,17 +113,17 @@ it uses __setitem__ to accomplish two things at one time:
 # x[3,'h']
 
 #this can be replaced by something in itertools
-class iprod(object): 
-   """index product: given a list/tuple of sets, 
+class iprod(object):
+   """index product: given a list/tuple of sets,
    enumerate all combinations as tuples."""
-   def __init__(self, *args): 
+   def __init__(self, *args):
       self._llist =  args
       self._sofar = []
 
-   def __iter__(self): 
-      return self.next() 
+   def __iter__(self):
+      return self.next()
 
-   def next(self): 
+   def next(self):
       for idx in self._llist[len(self._sofar)]:
          self._sofar.append(idx)
          if len(self._sofar)==len(self._llist):
@@ -141,7 +143,7 @@ class _guard(object):
        me.up = updater
 
    @property
-   def bounds(me): 
+   def bounds(me):
        return me.up.vbounds(True)
 
    def used(me):
@@ -171,8 +173,8 @@ class _guard(object):
    def listen2(me, expr, real=True):
       """register for possible changes."""
       def check(x): return isinstance(x,_proxy)
-      if check(expr): 
-          expr.register(me, real) 
+      if check(expr):
+          expr.register(me, real)
           return
       if not isinstance(expr, _exup):
           return
@@ -180,33 +182,34 @@ class _guard(object):
           p.register(me, real)
 
    def free(me, n=None): # free from bounds
-       '''set it all free if n is None. 
+       '''set it all free if n is None.
 otherwise delete only the n-th bound.'''
        assert me.up.id
        me.listen(False)
        if n is None:
             me.up.blist = []
        else: del me.up.blist[n]
-       me.update(False) 
+       me.update(False)
        me.listen(True)
        return me
 
    def reset(me, lo=0, hi=None):
-       '''reset the bounds to lo and hi, 
+       '''reset the bounds to lo and hi,
 all previous bounds are lost.'''
        assert me.up.id
        assert isConst(lo) and isConst(hi)
        me.listen(False)
        me.up.blist = [(lo, hi)]
-       me.update(False) 
+       me.update(False)
        me.listen(True)
        return me
 
 class _bnds(object): # as updater
    'class for bound management.'
    def addbounds(me, lo, hi, merge):
-      for i in lo, hi: 
-          assert isConst(i)
+      for i in (lo, hi): assert isConst(i)
+      gut=lambda x: x.up if isinstance(x, _math) else x
+      lo, hi = gut(lo), gut(hi)
       if not merge or not me.blist:
           me.blist.append((lo, hi))
           return # the simple way
@@ -225,23 +228,23 @@ class _bnds(object): # as updater
    ninf = float('-inf')
    def vbounds(me, nobt=False):
        """value of bounds"""
-       lo = max(v.value if type(v) in (_proxy, _parex) else 
+       lo = max(v.value if type(v) in (_proxy, _exup) else
                me.ninf if v is None else v
                for v, _ in me.blist) if me.blist else me.ninf
-       hi = min(v.value if type(v) in (_proxy, _parex) else
+       hi = min(v.value if type(v) in (_proxy, _exup) else
                me.pinf if v is None else v
                for _, v in me.blist) if me.blist else me.pinf
        #if lo > hi: raise Exception("Bound error: %s"% str(me))
        if nobt: return lo, hi
        if lo == hi: bt = glpk.GLP_FX
-       elif hi == me.pinf and lo != me.ninf: 
+       elif hi == me.pinf and lo != me.ninf:
            bt = glpk.GLP_LO
-       elif lo == me.ninf and hi != me.pinf: 
+       elif lo == me.ninf and hi != me.pinf:
            bt = glpk.GLP_UP
-       elif lo == me.ninf and hi == me.pinf: 
+       elif lo == me.ninf and hi == me.pinf:
            bt = glpk.GLP_FR
        else: bt = glpk.GLP_DB
-       return bt, lo, hi 
+       return bt, lo, hi
 
    def collect(me):
        'collect bounds into lo and hi sets'
@@ -253,12 +256,12 @@ class _bnds(object): # as updater
             if type(hi) in (int, float, long):
                mh, hi = min(mh, hi), None
             if lo is not None:
-                if lo is not hi: 
-                    llist.append(lo) 
+                if lo is not hi:
+                    llist.append(lo)
                 else: beq.append(lo)
-            if hi is not None: 
-                if hi is not lo: 
-                    hlist.append(hi) 
+            if hi is not None:
+                if hi is not lo:
+                    hlist.append(hi)
        if ml == mh: beq.append(ml)
        else:
           if me.ninf < ml: llist.append(ml)
@@ -290,13 +293,13 @@ class _vbup(_bnds):
             yield h
 
    def primal(me, m):
-       return (None if not m._solved else 
+       return (None if not m._solved else
                m.mip_col_val(me.id)
                 if m._solved == 'intopt' else
                m.get_col_prim(me.id) )
 
    def dual(me, m):
-       return (None  if not m._solved else 
+       return (None  if not m._solved else
                m.get_col_dual(me.id)
             if m._solved != 'intopt' else None)
 
@@ -306,7 +309,7 @@ as of glpk v4.60, it is known that when a
 binary variable is set to a fixed value,
 its kind will become integer.'''
        if me.id: m.set_col_bnds(me.id, *me.vbounds())
-        
+
 class _bexp(_bnds):
     'bounded expression.'
     def __init__(me, id, lo, expr, hi):
@@ -330,7 +333,7 @@ class _bexp(_bnds):
 
     def dual(me, m):
         return (None if not m._solved else
-                m.get_row_dual(me.id) 
+                m.get_row_dual(me.id)
               #not sure about interior point method
                 if m._solved != 'intopt' else None)
 
@@ -341,12 +344,13 @@ class _bexp(_bnds):
               "Error: constraint has no variables."
        exprconst = rex.const
        bt, lo, hi = me.vbounds()
+       #print(bt, repr(lo), repr(hi))
        lo -= exprconst #_linexp
        hi -= exprconst #_linexp
        mat = rex.matrix()
        n = len(mat)
-       cidx = glpk.intArray(1+n) 
-       cval = glpk.doubleArray(1+n) 
+       cidx = glpk.intArray(1+n)
+       cval = glpk.doubleArray(1+n)
        for i in range(n):
            cidx[1+i], cval[1+i] = mat[i]
        m.set_mat_row(me.id, n, cidx, cval)
@@ -363,10 +367,10 @@ class _bexp(_bnds):
 
 
 class _cons(_guard):
-    def __init__(me, id, lo, expr, hi): 
+    def __init__(me, id, lo, expr, hi):
         me.m = expr.m
         me.up = _bexp(id, lo, expr, hi)
-        me.update(False) 
+        me.update(False)
         me.name  = "R%i"%id
         me.listen()
 
@@ -380,21 +384,21 @@ class _cons(_guard):
        me.m, me.up = None, None
 
     def boundby(me, lo, hi): #constrain
-        '''assume this is always called when adding 
+        '''assume this is always called when adding
 another bound in continuous comparisons.'''
         me.up.addbounds(lo, hi, True) #merge to prev
         #me.up.update_bounds(me.m)
-        me.update(False) 
+        me.update(False)
         me.listen2(lo)
         me.listen2(hi)
         return me
-    
+
     @property
-    def status (me): 
+    def status (me):
         return me.m.get_row_stat(me.up.id)
 
     #@property
-    #def bounds(me): 
+    #def bounds(me):
     #    return me.up.vbounds()[1:]
               #(me.m.get_row_lb(me.up.id),
               #me.m.get_row_ub(me.up.id))
@@ -404,17 +408,17 @@ another bound in continuous comparisons.'''
 
     @property
     def dual (me): return me.up.dual(me.m)
- 
+
     @property
-    def name(me): 
+    def name(me):
         return me.m.get_row_name(me.up.id)
 
     @name.setter
-    def name(me, name): 
+    def name(me, name):
         me.m.set_row_name(me.up.id, name)
 
-    def __repr__(me): 
-        return '%s: %s'%(me.name, 
+    def __repr__(me):
+        return '%s: %s'%(me.name,
             me.up.repr(repr(me.up.expr)))
 
 
@@ -483,7 +487,7 @@ so that the subclasses can be operated by operators like
           return me if b>0 else -me
        return _parex(b, '/', me)
 
-   def __pos__(me): 
+   def __pos__(me):
        return _parex(0, 'ps', me)
 
    def __neg__(me):
@@ -494,9 +498,9 @@ so that the subclasses can be operated by operators like
 
 def isConst(b):
        if b is None: return True
-       if type(b) in (int, float, long, _param): 
+       if type(b) in (int, float, long, _param):
           return True
-       if isinstance(b, _parex): 
+       if isinstance(b, _parex):
           return b.isConst()
        if isinstance(b, _var):
           return False
@@ -526,51 +530,51 @@ class _proxy(object): # value proxy
 
 class _param(_math):
    """A parameter, whose value may be changed,
-When a parameter changed in value, it will 
+When a parameter changed in value, it will
 add it self to the class owned dirty list.
-Each param also maintains its own list of listeners. 
+Each param also maintains its own list of listeners.
 The listeners can be _parex or variable objects.
 A class method is also provided to fire off the
 updating process.
 
 To avoid loop reference, a param holds a value proxy,
-and hands it out during operations. 
-The proxy holds the param value, so the value is 
+and hands it out during operations.
+The proxy holds the param value, so the value is
 updated directly.
 """
-   #def __iadd__(me, b): 
+   #def __iadd__(me, b):
    #    raise Exception("Bad opperation!")
 
-   #def __isub__(me, b): 
+   #def __isub__(me, b):
    #    raise Exception("Bad opperation!")
 
-   #def __imul__(me, b): 
+   #def __imul__(me, b):
    #    raise Exception("Bad opperation!")
 
-   #def __idiv__(me, b): 
+   #def __idiv__(me, b):
    #    raise Exception("Bad opperation!")
 
    #def __ipow__(me, b):
    #    raise Exception("Bad opperation!")
 
    def __init__(me, name, val=None):
-      '''When a param changes, clients using it might wish to 
-be informed of the chanage and update itself. 
+      '''When a param changes, clients using it might wish to
+be informed of the chanage and update itself.
 typical clients are instances of the class _var and _parex.
 as both variable and _parex redefine the __eq__ method,
 which always returns a true value(for we abused it
 to express constraints and bounds, and if false value is returned,
-later continuous comparisons will be ignored by reason of the 
+later continuous comparisons will be ignored by reason of the
 short circuiting of logic and operation), we can't define
 __hash__ in a way that makes sense. for example,
-when two different instances collide by reason of 
-the hash value in a set, usually the hash values 
+when two different instances collide by reason of
+the hash value in a set, usually the hash values
 of them are compared first, if the have the same
-hash value, then the __eq__ method is used to 
-decide whether they are of the same value (maybe 
-their ids are compared right before __eq__ method). 
-If that's how set is implemented in Python, 
-then we can simply use id(self) for the hash value 
+hash value, then the __eq__ method is used to
+decide whether they are of the same value (maybe
+their ids are compared right before __eq__ method).
+If that's how set is implemented in Python,
+then we can simply use id(self) for the hash value
 and the abused __eq__ method will never be called.
 the experiment below shows that this is indeed the case:
 
@@ -579,31 +583,32 @@ the experiment below shows that this is indeed the case:
     ...   def __init__(me, hv): me.hv = hv
     ...   def __hash__(me): return me.hv
     ...   def __eq__(me, ot): return True
-    ... 
+    ...
 s = set(hashtest(i) for i in range(1000000))
 >>> len(s)
 1000000
 >>> class ht2:
     ...   def __eq__(me, ot): return True
     ...   def __hash__(me): return id(me)
-    ... 
+    ...
 >>> s = set(ht2() for i in range(500000))
 >>> len(s)
 500000
->>> 
+>>>
 
 To be absolutely safe, one might suggest to register a proxy
 of a variable or constrained _parex for param changes.
-but loop ref will be formed as the proxy holds a ref to 
+but loop ref will be formed as the proxy holds a ref to
 a variable or _parex, which also holds a ref to its proxy.
 
-The final solution is to have a dict using the client's id as keys 
-for that client.
+The final solution is to have a dict using the client's id as keys
+for that client. if the dict holds a weakref, that'd be good.
 '''
       if type(val) not in (int, float, long):
         raise Exception("Bad parameter value!")
       me.clients = dict() #loop refs? value proxy
-      # value proxy, weakref to me, no loop refs!
+      # value proxy, weakref to me, no more loop refs 
+      # as the clients only hold refs to the proxy!
       me.up = _proxy(name, val, me)
 
    def __str__(me):
@@ -619,13 +624,13 @@ for that client.
    def value(me): return me.up.value
 
    @value.setter
-   def value(me, val): 
+   def value(me, val):
        if val == me.up.value: return
        me.up.value = val
        for i, c in me.clients.items():
            c.value_changed(me)
 
-   def __repr__(me): 
+   def __repr__(me):
       return repr(me.up)
 
    spid = 0
@@ -640,7 +645,7 @@ name(required): a str for the name of the parameter(s).
 
 val(default 0): may take the following types of values:
 
-  1. a single value in (int, long, float) 
+  1. a single value in (int, long, float)
      -> a single parameter with the given name a value.
   2. a list/tuple of values -> a list of parameters,
      with names indicating the position index.
@@ -660,23 +665,23 @@ val(default 0): may take the following types of values:
       if type(val) in (int, long, float):
          return _param( name, val )
       if type(val) in (list, tuple):
-         return [me.par("%s[%d]"%(name, i), v) for 
+         return [me.par("%s[%d]"%(name, i), v) for
            i,v in enumerate(val)]
-      if type(val) == dict: 
+      if type(val) == dict:
          pp = val.copy(); name += "[%s]"
-         for t in val: 
+         for t in val:
             pp[t] = me.par(name%subscript(t), val[t])
          return pp
       #assume to be something iterable (generator, set, ...):
       #however, if v is a string, umlimited recursion results
-      return me.par(name, [v for v in val]) 
+      return me.par(name, [v for v in val])
 
 par = _param.par #global version
 
 class _var(_math, _guard):
-   """Represents a variable. 
+   """Represents a variable.
 Set bounds using A <= x <= B.
-If A or B is an expression containing parameters, 
+If A or B is an expression containing parameters,
 the bounds will be updated if the parameters changes.
 To fix a variable at constant C, simply use x == C.
 It is possible to set bounds several times:
@@ -686,7 +691,7 @@ the result is: A1 <= x <= B2
 """
 
    def __init__(me, model, cid, name=None, kind=float, bounds=(0,None)):
-       'to make a free variable, let bounds = (None, None)' 
+       'to make a free variable, let bounds = (None, None)'
        me.m = model
        me.up = _vbup(cid, *bounds)
        me.update(False)
@@ -706,14 +711,14 @@ the result is: A1 <= x <= B2
         return me
 
    #@property
-   #def bounds(me): 
+   #def bounds(me):
    #    return (me.m.get_col_lb(me.up.id),
    #            me.m.get_col_ub(me.up.id))
 
-   kindmap2py = {glpk.GLP_CV:float, 
+   kindmap2py = {glpk.GLP_CV:float,
       glpk.GLP_IV:int, glpk.GLP_BV:bool}
    @property
-   def kind(me): 
+   def kind(me):
       me.update(True)
       kind = me.m.get_col_kind(me.up.id)
       return me.kindmap2py[kind]
@@ -721,13 +726,13 @@ the result is: A1 <= x <= B2
    kindmap2glpk = {float:glpk.GLP_CV,
                int:glpk.GLP_IV, bool:glpk.GLP_BV}
    @kind.setter
-   def kind(me, kind): 
+   def kind(me, kind):
        if kind is bool: me.reset(0,1)
        kind = me.kindmap2glpk[kind]
        me.m.set_col_kind(me.up.id, kind)
 
    @property
-   def status(me): 
+   def status(me):
        return me.m.get_col_stat(me.up.id)
 
    @property
@@ -740,11 +745,11 @@ the result is: A1 <= x <= B2
    def name(me): return me.up.name
 
    @name.setter
-   def name(me, name): 
+   def name(me, name):
       me.m.set_col_name(me.up.id, name)
       me.up.name = name
 
-   _var_kinds = {float:'continuous', 
+   _var_kinds = {float:'continuous',
         int:'integer', bool:'binary'}
 
    def __repr__(me):
@@ -761,7 +766,7 @@ the result is: A1 <= x <= B2
           return me.boundby(None, b, c is me)
        return me.m.newcon(None, me-b, 0).used()
 
-   def __ge__(me, b): 
+   def __ge__(me, b):
        c = me.m.replace_last(None)
        if me._bad_type(b): return NotImplemented
        if isConst(b):
@@ -786,7 +791,7 @@ the result is: A1 <= x <= B2
        me.m, me.up = None, None
 
 class _obj(_guard):
-    
+
    def __init__(me, model, max, expr, name):
        me.m = model
        me.up = _obup(expr)
@@ -825,7 +830,7 @@ class _obup(object):
        me.expr = expr.up
 
    def data(me): yield me.expr
-       
+
    def update(me, m):
        expr = me.expr.linearize()
        assert type(expr) is _linexp,\
@@ -833,14 +838,16 @@ class _obup(object):
        #if not isinstance(expr, _linexp):
        #   return m.set_obj_coef(0, expr) #_linexp
        for i, c in expr.mat:
-           m.set_obj_coef(i, c) 
+           m.set_obj_coef(i, c)
        m.set_obj_coef(0, expr.const) #_linexp
 
 class _exup(object):
+   'expression updater'
+
    def __init__(me, left, op, rite):
       gut=lambda x: x.up if isinstance(x, _math) else x
       me.left = gut(left)
-      me.op = op #must be str 
+      me.op = op #must be str
       me.rite = gut(rite)
 
    @staticmethod
@@ -873,11 +880,11 @@ class _exup(object):
    def __repr__(me):
       ret = []
       for i in me.pinorder():
-         assert type(i) in (str, int, long, float, 
+         assert type(i) in (str, int, long, float,
                 _proxy, _vbup, _exup)
          if type(i) is _vbup:
             ret.append( i.name )
-         elif i in ('ps', 'ng'): 
+         elif i in ('ps', 'ng'):
             ret.append({'ps':'+','ng':'-'}[i])
          elif type(i) is str:
             ret.append( i )
@@ -887,10 +894,10 @@ class _exup(object):
    def __str__(me):
       cols = {}
       def check(x): return isinstance(x, _vbup)
-      for v in me.preorder(check): 
+      for v in me.preorder(check):
          cols[v.up.id] = v
       lexp = me.linearize()
-      return lexp.tostr(cols)
+      return lexp.tostr(cols) if isinstance(lexp, _linexp) else str(lexp)
 
    def preorder(me, check=lambda x:True):
       """reversed preorder traversal."""
@@ -905,26 +912,26 @@ class _exup(object):
          nodes.append(cur.rite)
 
    import operator
-   operations_map = { #switch(t) 
+   operations_map = { #switch(t)
             '+': operator.add, #lambda a,b: a+b,
             '-': operator.sub, #lambda a,b: a-b,
             '*': operator.mul, #lambda a,b: a*b,
             # to avoid integer division
-            '/': operator.truediv, #lambda a,b: (a+0.0)/b, 
+            '/': operator.truediv, #lambda a,b: (a+0.0)/b,
             '**': operator.pow, #lambda a,b: a**b,
             '<=': operator.le, #lambda a,b: a<=b,
             '>=': operator.ge, #lambda a,b: a>=b,
             '==': operator.eq, #lambda a,b: a==b,
             'ps': lambda a,b: +b,
             'ng': lambda a,b: -b
-          } 
+          }
 
-   def linearize(me, m=None): 
+   def linearize(me, m=None):
        """
 convert this expression to a _linexp.
 
 Args:
-   m (model): 
+   m (model):
        when None, a _linexp is constructed.
        when a model instance, a variable takes its primal value.
   returns: a _linexp or a number.
@@ -940,13 +947,18 @@ Args:
              if not t.id: stack.append(0.0) #deleted
              else: stack.append(_linexp(t)
                if m is None else t.primal(m))
-          else: stack.append( 
+          else: stack.append(
                     me.operations_map[t](
                         stack.pop(), stack.pop()
                     )
                 )
        assert len(stack)==1
        return stack[0]
+
+   @property
+   def value(me):
+      'return a float if me is constant, o/w a _linexp'
+      return me.linearize()
 
 class _parex(_math):
    """expression that can take parameter objects.
@@ -960,7 +972,7 @@ to have the model updated.
       assert ml is None or mr is None or ml is mr
       me.m = ml or mr
 
-      me.up = _exup(left, op, rite) 
+      me.up = _exup(left, op, rite)
 
    def __repr__(me): return me.up.__repr__()
 
@@ -974,13 +986,13 @@ to have the model updated.
    #    return p
 
 
-   #the value when the _parex is a constant 
+   #the value when the _parex is a constant
    @property
-   def value(me): 
+   def value(me):
        assert me.m is None
        return me.up.linearize()
 
-   def evaluate(me): 
+   def evaluate(me):
        """
 evaluate this expression to a number with
 variables taking their primal values.
@@ -993,7 +1005,7 @@ variables taking their primal values.
      rex = (expr1 <= expr2 <= expr3)
    the rex gets 'expr2 <= expre3',
    and the constraint 'expr1 <= expr2' is lost
-   (when expr1 or expr3 contains variables, 
+   (when expr1 or expr3 contains variables,
     the constraint is not well defined).
    However, if expr1 and expr3 are CONSTANTS,
    such as: 0 <= expr <= 3, then nothing is lost.
@@ -1012,7 +1024,7 @@ variables taking their primal values.
 
    def __ge__(me, b): # me >= b
        if me._bad_type(b): return NotImplemented
-       if isConst(me): 
+       if isConst(me):
           return me.value >= b if isConst(b) else b <= me
        c = me.m.replace_last(None)
        if not isinstance(c, _cons): c = None
@@ -1025,7 +1037,7 @@ variables taking their primal values.
 
    def __eq__(me, b):
        if me._bad_type(b): return NotImplemented
-       if isConst(me): 
+       if isConst(me):
           return me.value == b if isConst(b) else b == me
        c = me.m.replace_last(None)
        if not isinstance(c, _cons): c = None
@@ -1044,7 +1056,7 @@ class _linexp(object): #linear expressions
    def __init__(me, var=None, coef=1.0):
        me.const = 0
        me.mat = []
-       if var is not None: 
+       if var is not None:
           me.mat.append((var.id, coef))
 
    def matrix(me): #get the corresponding matrix row
@@ -1068,7 +1080,7 @@ class _linexp(object): #linear expressions
    def _bad_type(me, b):
        return type(b) not in (int, float, long, _linexp)
 
-   #If one of those methods does not support the operation with 
+   #If one of those methods does not support the operation with
    #the supplied arguments, it should return NotImplemented.
    def __add__(me, be):
        if me._bad_type(be): return NotImplemented
@@ -1088,7 +1100,7 @@ class _linexp(object): #linear expressions
                mc.append(mb[b]); b += 1; continue
            if a<na and b<nb and ma[a][0] == mb[b][0]:
                v = ma[a][1]+mb[b][1]
-               #if v: mc.append((ma[a][0], v)) 
+               #if v: mc.append((ma[a][0], v))
                mc.append((ma[a][0], v)) #don't eliminate!
                a += 1; b += 1
        rex.const = me.const + be.const
@@ -1130,8 +1142,8 @@ class _linexp(object): #linear expressions
           return NotImplemented
        return me * (1.0/b)
 
-   def __pos__(me): 
-       return me 
+   def __pos__(me):
+       return me
 
    def __neg__(me):
        return me*(-1.0)
@@ -1154,18 +1166,18 @@ class _linexp(object): #linear expressions
 ##    for i in range(0, n, 3):
 ##        print(str(_related[i:i+3])[1:-1], ',')
 ##    print(i, "out of total:", n)
-    
+
 
 class _Extractor(object):
-    '''given the glpk.h file and the doc directory 
+    '''given the glpk.h file and the doc directory
 with the glpk*.tex files, this will find all
 funsctions in glpk.h that matches a rex,
-and find the corresponding documentation in 
+and find the corresponding documentation in
 the tex file.'''
     import re, glob
-    
+
     debug = False
-    
+
     def __init__(me, glpk_h, doc_dir):
         me.glpk_h = glpk_h
         me.doc_dir = doc_dir
@@ -1187,10 +1199,10 @@ the tex file.'''
         dod = {}
         #now find the docs
         for name in me.glob.iglob(me.doc_dir+'/glpk*.tex'):
-            with open(name) as docf: 
+            with open(name) as docf:
                  print(name)
                  #print(me.rex_com.findall(docf.read()))
-                 me.grep_file(docf, dod, funs) 
+                 me.grep_file(docf, dod, funs)
         return dod
 
     known_coms = ('\\vspace', '\\hspace', '\\begin', '\\end')
@@ -1202,27 +1214,27 @@ the tex file.'''
     rex_altsyn_end= re.compile(r'[^)]+\)\s*;\s*\}')
     rex_com = re.compile(r'\s*(\\[a-zA-Z]\w*)(\s*\*?\s*\{-?\w+\}|=-?\w+\b)?')
 
-    replaces = ( ('\\ x\\ ', ' x '), 
-            ('\\verb|GLP_', '|glpk.GLP_'), ('\\verb|', '|'), 
-            ('\\leq','<='), ('\\lt','<'), 
-            ('\\geq',">="), ('\\gt','>'), 
+    replaces = ( ('\\ x\\ ', ' x '),
+            ('\\verb|GLP_', '|glpk.GLP_'), ('\\verb|', '|'),
+            ('\\leq','<='), ('\\lt','<'),
+            ('\\geq',">="), ('\\gt','>'),
             ('\\infty','inf'), ('\\dots','...'))
 
     def grep_file(me, docf, dod, funs=None):
         '''grep one tex document.''' #TODO: simplify it.
-        maxseek, maxlines = 20, 100    
+        maxseek, maxlines = 20, 100
         state, lines, no_return = 0, None, None
         for ln in docf:
-            if state and len(lines)>maxlines: 
+            if state and len(lines)>maxlines:
                 print(state, name, ''.join(lines))
                 raise Exception(
                     "doc problem: lines exceeding %i."%maxlines)
 
-            if '\\newpage' in ln or ln.lstrip().startswith('%'): 
+            if '\\newpage' in ln or ln.lstrip().startswith('%'):
                 continue
 
 
-            if state: 
+            if state:
                 for kk,rr in me.replaces:
                     if kk not in ln: continue
                     ln = ln.replace(kk, rr)
@@ -1238,23 +1250,23 @@ the tex file.'''
                 if me.debug: print(name, shortdesc)
                 if "}" not in shortdesc:
                     print( state, name, shortdesc)
-                    print("Badly formatted text.\n"+ln) 
+                    print("Badly formatted text.\n"+ln)
                     state, lines, no_return = 0, None, None
                     continue #abort this attempt
                 shortdesc = shortdesc[:shortdesc.rindex("}")]
                 lines = [name+" --- " + shortdesc+"\n"]
                 state += 1
-                
+
             elif state == 1:
                 if ln.startswith('\\synopsis'):
                    lines.append('synopsis:\n')
                 elif ln.startswith('\\begin{verbatim}'):
-                    state += 2; 
-                elif m.group(1) in ln: 
+                    state += 2;
+                elif m.group(1) in ln:
                     m = me.rex_altsyn.match(ln)
-                    if not m: 
+                    if not m:
                         print( state, ''.join(lines))
-                        print("Badly formatted text.\n"+ln) 
+                        print("Badly formatted text.\n"+ln)
                         state, lines, no_return = 0, None, None
                         continue #abort this attempt
                     no_return = m.group(2).strip() == 'void'\
@@ -1265,8 +1277,8 @@ the tex file.'''
                     lines.append(me.rex_com.sub('', ln))
                     if  me.rex_altsyn_end.match(ln):
                         state += 3 #jump
-                    else: state += 1 
-                else: 
+                    else: state += 1
+                else:
                     rm = me.rex_com.match(ln)
                     if rm and rm.group(1) not in me.known_coms:
                         print( state, ''.join(lines))
@@ -1282,18 +1294,18 @@ the tex file.'''
                 lines.append(me.rex_com.sub('', ln))
                 if me.rex_altsyn_end.match(ln):
                     state += 2
-                
+
             elif state == 3: #watch out for void return type
-                if ln.startswith('\\end{verbatim}'): 
+                if ln.startswith('\\end{verbatim}'):
                     if no_return is None:
                         print( state, ''.join(lines))
                         print("no_return is None!\n"+ln)
                         state, lines, no_return = 0, None, None
                         continue #abort this attempt
                     else: state += 1; continue
-                if name in ln: 
+                if name in ln:
                     m = me.rex_synop.match(ln)
-                    if m: 
+                    if m:
                         if m.group(3) != name:
                             print( state, ''.join(lines))
                             print("bad function name:\n"+ln)
@@ -1314,7 +1326,7 @@ the tex file.'''
                 if ln.startswith('\\returns'):
                     lines.append('returns:\n')
                     state += 2 #jump
-                    if no_return: 
+                    if no_return:
                         print( state, ''.join(lines))
                         print("no_return is true, but got returns")
                         state, lines, no_return = 0, None, None
@@ -1332,12 +1344,12 @@ the tex file.'''
                 else:
                     lines.append(me.rex_com.sub('', ln))
                     if len(lines) < maxseek: continue
-                    
+
                     print( state, ''.join(lines))
                     print("neither description nor returns?")
                     state, lines, no_return = 0, None, None
-                    continue #abort this attempt    
-                        
+                    continue #abort this attempt
+
             elif state == 5: #has return
                 if ln.startswith('\\returns'):
                     lines.append('returns:\n')
@@ -1352,7 +1364,7 @@ the tex file.'''
                     dod[name] = ''.join(lines)
                     state, lines, no_return = 0, None, None
                 else: lines.append(me.rex_com.sub('',ln))
-                
+
                 if state: continue
                 # copy & paste from "if state == 0:"
                 m = me.rex_start.match(ln)
@@ -1365,7 +1377,7 @@ the tex file.'''
                 if me.debug: print(name, shortdesc)
                 if "}" not in shortdesc:
                     print( state, name, shortdesc)
-                    print("Badly formatted text.\n"+ln) 
+                    print("Badly formatted text.\n"+ln)
                     state, lines, no_return = 0, None, None
                     continue #abort this attempt
                 shortdesc = shortdesc[:shortdesc.rindex("}")]
@@ -1378,7 +1390,7 @@ the tex file.'''
     def undocumented(me):
         funs = me.grep_funs(
             r'^\s*\w+(\s+\w+)*\s*\**\s*(glp_\w+)\s*\(', 2)
-        
+
         dod = me.grep_doc(funs)
 
         print('\n\nHere are the undocumented:\n')
@@ -1387,9 +1399,9 @@ the tex file.'''
             if k not in dod:
                 n += 1
                 print (n, k)
-                
-    def interactive(dod):        
-        badname = "No such function name."    
+
+    def interactive(dod):
+        badname = "No such function name."
         while True:
             k = raw_input("Function name: ")
             if not k: break
@@ -1399,14 +1411,14 @@ the tex file.'''
     def lp_related(me, silent=False):
         funs = me.grep_funs(r'(glp_\w+)\s*\(\s*glp_prob\s*\*', 1)
         dod = me.grep_doc(funs)
-    
+
         nodoc = "No original doc found in glpk."
         for k in funs:
             if k not in dod:
                 dod[k] = nodoc
                 print ('#', k, ':', nodoc)
         if silent: return dod
-        
+
         for k,d in dod.items():
             print(repr(k), ':', sep='')
             print("'''", d, "''',\n", sep='')
@@ -4289,7 +4301,7 @@ set to |glpk.GLP_IV|, its lower bound were set 0, and its upper bound
 were set to 1.
 '''
 }#_related
-    
+
     if 'glp_delete_prob' not in _related:
         print("Warning: glp_delete_prob is abscent!")
 
@@ -4300,7 +4312,7 @@ were set to 1.
             me._glp_ = glpk.glp_create_prob()
             if __init__: __init__(me, *args, **kwds)
         return init
-    
+
     @staticmethod
     def _del(__del__):
         def delete(me):
@@ -4314,23 +4326,23 @@ were set to 1.
     @staticmethod
     def defs(names, decorated=False): #do exec right after __init__ and __del__ defs
         '''param decorated: if already decorated __init__ and __del__.'''
-        
+
         for name, doc in _LinkGLPK._related.items():
             m = name[4:]
-            if m in names: 
+            if m in names:
                 mm = names[m]
                 m = name[3:]
                 assert m not in names
                 mm.__doc__ = """
 {oldoc}
 
-Note: this is a manual wrapper for the glpk routine glp{name}. 
-the automatic wrapper is model.{name}, for the glpk documentation, 
+Note: this is a manual wrapper for the glpk routine glp{name}.
+the automatic wrapper is model.{name}, for the glpk documentation,
 try this at a python interactive session:
 >>> from pymprog import model
 >>> help(model.{name})
 
-""".format(name = m, doc = doc, oldoc = 
+""".format(name = m, doc = doc, oldoc =
         mm.__doc__ or "Note: No manual docstr found.")
 
             yield '''
@@ -4349,7 +4361,7 @@ def {name}(me, *args):
 
     ## Code below implements the metaclass way
     def __new__(cls, name, bases, dct):
-        
+
         def add_fun(f, name, gname):
             def meth(me, *args): return f(me._glp_, *args)
             meth.__name__ = gname
@@ -4362,21 +4374,21 @@ def {name}(me, *args):
             f = getattr(glpk, fadd, None)
             if f is None:
                 print("Meta: %s seems missing in swiglpk."%fadd)
-                continue 
+                continue
             m = fadd[4:]
-            if m in dct: 
+            if m in dct:
                 mm = dct[m]
                 m = fadd[3:] # starts with _
                 mm.__doc__ = """
 {oldoc}
 
-Note: this is a manual wrapper for the glpk routine glp{name}. 
-the automatic wrapper is model.{name}, for the glpk documentation, 
+Note: this is a manual wrapper for the glpk routine glp{name}.
+the automatic wrapper is model.{name}, for the glpk documentation,
 try this at a python interactive session:
 >>> from pymprog import model
 >>> help(model.{name})
 
-""".format(name = m, doc = doc, oldoc = 
+""".format(name = m, doc = doc, oldoc =
         mm.__doc__ or "Note: No manual docstr found.")
 
             add_fun(f, m, fadd)
@@ -4419,7 +4431,7 @@ Here is the documentation on the original method:
         for name in _globalized:
             f = getattr(model, name)
             assert callable(f)
-            yield gft.format(name=name, 
+            yield gft.format(name=name,
                 doc=getattr(model, name).__doc__)
 
 #@_with_metaclass(_LinkGLPK) #the metaclass way
@@ -4429,9 +4441,9 @@ class model(object):
     for how to use that object to solve models,
     you can refer to PyGLPK documentation.
     Once the model is solved, you can access
-    the results via that object. You can also 
+    the results via that object. You can also
     access the solution by the variables created
-    via the "var()" method, or find out the 
+    via the "var()" method, or find out the
     status of the constraints by the constraints
     created by the "st()" method."""
    #only for implementation of the global interface.
@@ -4445,7 +4457,7 @@ class model(object):
       #print('update params', cls.dirtyset)
       if not me.lazy: return
       for e in me.lazy:
-        e.update(me) 
+        e.update(me)
       me.lazy = set()
 
    def update1(me, up):
@@ -4461,22 +4473,22 @@ class model(object):
    def replace_last(me, last): # msg mechanism
        last, me._last = me._last, last
        return last
-       
+
    def __init__(me, name, as_global=False):
       assert name
       me.name = str(name)
       me.lazy = set()
       me.verb = False
       # new ways of doing option
-      me.options = { kind: {} 
+      me.options = { kind: {}
         for kind in me.opt_kinds
       } # solver options
 
       me._solved = me._last = None
 
       # or use lists of weakrefs
-      me._colmap = model._idxmap() 
-      me._rowmap = model._idxmap() 
+      me._colmap = model._idxmap()
+      me._rowmap = model._idxmap()
 
       if as_global:
           prob = model._prob_
@@ -4488,116 +4500,116 @@ class model(object):
                'is' if me is model._prob_ else 'is not')
 
    def add_rows(me, n):
-       "add_rows with transparent index mapping." 
+       "add_rows with transparent index mapping."
        return me._rowmap.add(n, me._add_rows)
    def del1row(me, rid):
-       "delete one row with transparent index mapping." 
+       "delete one row with transparent index mapping."
        me._rowmap.del1(rid, me._del_rows)
    def del_rows(me, ids):
-       "delete many rows with transparent index mapping." 
+       "delete many rows with transparent index mapping."
        me._rowmap.delmany(ids, me._del_rows)
    def set_mat_row(me, rid, n, cidx, cval):
-       "set_mat_row with transparent index mapping." 
+       "set_mat_row with transparent index mapping."
        rid = me._rowmap.map(rid)
        if rid: return me._set_mat_row(rid, n, cidx, cval)
    def set_row_bnds(me, rid, bt, lo, hi):
-       "set_row_bnds with transparent index mapping." 
+       "set_row_bnds with transparent index mapping."
        rid = me._rowmap.map(rid)
        if rid: return me._set_row_bnds(rid, bt, lo, hi)
    def get_row_lb(me, rid):
-       "get_row_lb with transparent index mapping." 
+       "get_row_lb with transparent index mapping."
        rid = me._rowmap.map(rid)
        if rid: return me._get_row_lb(rid)
    def get_row_ub(me, rid):
-       "get_row_ub with transparent index mapping." 
+       "get_row_ub with transparent index mapping."
        rid = me._rowmap.map(rid)
        if rid: return me._get_row_ub(rid)
    def get_row_type(me, rid):
-       "get_row_type with transparent index mapping." 
+       "get_row_type with transparent index mapping."
        rid = me._rowmap.map(rid)
        if rid: return me._get_row_type(xid)
    def get_row_stat(me, rid):
-       "get_row_stat with transparent index mapping." 
+       "get_row_stat with transparent index mapping."
        rid = me._rowmap.map(rid)
        if rid: return me._get_row_stat(rid)
    def mip_row_val(me, rid):
-       "mip_row_val with transparent index mapping." 
+       "mip_row_val with transparent index mapping."
        rid = me._rowmap.map(rid)
        if rid: return me._mip_row_val(rid)
    def get_row_dual(me, rid):
-       "get_row_dual with transparent index mapping." 
+       "get_row_dual with transparent index mapping."
        rid = me._rowmap.map(rid)
        if rid: return me._get_row_dual(rid)
    def get_row_prim(me, rid):
-       "get_row_prim with transparent index mapping." 
+       "get_row_prim with transparent index mapping."
        rid = me._rowmap.map(rid)
        if rid: return me._get_row_prim(rid)
    def get_row_name(me, rid):
-       "get_row_name with transparent index mapping." 
+       "get_row_name with transparent index mapping."
        rid = me._rowmap.map(rid)
        if rid: return me._get_row_name(rid)
 
    def add_cols(me, n):
-       "add_cols with transparent index mapping." 
+       "add_cols with transparent index mapping."
        return me._colmap.add(n, me._add_cols)
    def del1col(me, xid):
-       "delete one col with transparent index mapping." 
+       "delete one col with transparent index mapping."
        me._colmap.del1(xid, me._del_cols)
    def del_cols(me, ids):
-       "delete many cols with transparent index mapping." 
+       "delete many cols with transparent index mapping."
        me._colmap.delmany(ids, me._del_cols)
    def set_col_bnds(me, xid, bt, lo, hi):
-       "set_col_bnds with transparent index mapping." 
+       "set_col_bnds with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid > 0: return me._set_col_bnds(xid, bt, lo, hi)
    def get_col_lb(me, xid):
-       "get_col_lb with transparent index mapping." 
+       "get_col_lb with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid> 0: return me._get_col_lb(xid)
    def get_col_ub(me, xid):
-       "get_col_ub with transparent index mapping." 
+       "get_col_ub with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid > 0: return me._get_col_ub(xid)
    def set_col_kind(me, xid, kind):
-       "set_col_kind with transparent index mapping." 
+       "set_col_kind with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid > 0: return me._set_col_kind(xid, kind)
    def get_col_kind(me, xid):
-       "get_col_kind with transparent index mapping." 
+       "get_col_kind with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid > 0: return me._get_col_kind(xid)
    def get_col_type(me, xid):
-       "get_col_type with transparent index mapping." 
+       "get_col_type with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid > 0: return me._get_col_type(xid)
    def get_col_stat(me, xid):
-       "get_col_stat with transparent index mapping." 
+       "get_col_stat with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid > 0: return me._get_col_stat(xid)
    def mip_col_val(me, xid):
-       "mip_col_val with transparent index mapping." 
+       "mip_col_val with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid > 0: return me._mip_col_val(xid)
    def get_col_dual(me, xid):
-       "get_col_dual with transparent index mapping." 
+       "get_col_dual with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid > 0: return me._get_col_dual(xid)
    def get_col_prim(me, xid):
-       "get_col_prim with transparent index mapping." 
+       "get_col_prim with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid > 0: return me._get_col_prim(xid)
    def get_col_name(me, xid):
-       "get_col_name with transparent index mapping." 
+       "get_col_name with transparent index mapping."
        xid = me._colmap.map(xid) if xid else xid
        if xid>0: return me._get_col_name(xid)
- 
+
    def set_obj_coef(me, xid, v):
-       "set_obj_coef with transparent index mapping." 
+       "set_obj_coef with transparent index mapping."
        if xid == 0: return me._set_obj_coef(xid, v)
        xid = me._colmap.map(xid) if xid else xid
        if xid > 0: return me._set_obj_coef(xid, v)
    def get_obj_coef(me, xid ):
-       "get_obj_coef with transparent index mapping." 
+       "get_obj_coef with transparent index mapping."
        if xid == 0: return me._get_obj_coef(xid)
        xid = me._colmap.map(xid) if xid else xid
        if xid>0: return me._get_obj_coef(xid)
@@ -4607,23 +4619,23 @@ class model(object):
             me.lmap = None
             me.nmap = 0
         def newmap(me):
-            me.lmap = [i for i in range(me.nmap+1)] 
+            me.lmap = [i for i in range(me.nmap+1)]
             me.lmap[0] = -1 #head
-        def map(me, xid): 
-            if me.lmap and 0< xid < len(me.lmap): 
-               return me.lmap[xid] 
-            return xid if not me.lmap and xid <=me.nmap else 0 
+        def map(me, xid):
+            if me.lmap and 0< xid < len(me.lmap):
+               return me.lmap[xid]
+            return xid if not me.lmap and xid <=me.nmap else 0
         def add(me, n, call=None):
             if call: call(n)
             idx = me.nmap + 1
-            me.nmap += n 
+            me.nmap += n
             if not me.lmap: return idx
             me.lmap.extend(range(idx, idx+n))
             return len(me.lmap) - n
         def del1(me, xid, call = None):
             mid = me.map(xid)
-            assert mid > 0 
-            if call: 
+            assert mid > 0
+            if call:
                 xa = glpk.intArray(2)
                 xa[1] = mid
                 call(1, xa)
@@ -4631,20 +4643,20 @@ class model(object):
                 if mid == me.nmap: #last col
                     me.nmap -= 1
                     return
-                me.newmap() 
+                me.newmap()
             me.lmap[xid] = 0
             while me.lmap[-1] == 0:
                 del me.lmap[-1]
             for k in range(xid+1, len(me.lmap)):
                 v = me.lmap[k]
                 if v: me.lmap[k] = v-1
-            if len(me.lmap)==1: 
+            if len(me.lmap)==1:
                 me.lmap == None
             me.nmap -= 1
 
         def delmany(me, idx, call=None):
             idx.sort()
-            idx = [d for i,d in enumerate(idx) 
+            idx = [d for i,d in enumerate(idx)
                     if i==0 or idx[i-1]!=d]
             cc = len(idx)
             if call:
@@ -4657,14 +4669,14 @@ class model(object):
                 if me.map(idx[0]) + cc - 1 == me.nmap: #last cols
                     me.nmap -= cc
                     return
-                me.newmap() 
+                me.newmap()
             for xid in idx: me.lmap[xid] = 0
             while me.lmap[-1] == 0:
                 del me.lmap[-1]
             for j, xx in enumerate(idx):
                 if not j: xid=xx; continue
-                if xx >= len(me.lmap): 
-                    xx = len(me.lmap) 
+                if xx >= len(me.lmap):
+                    xx = len(me.lmap)
                 for k in range(xid+1, xx):
                     v = me.lmap[k]
                     if v: me.lmap[k] = v-j
@@ -4676,7 +4688,7 @@ class model(object):
                     v = me.lmap[k]
                     if v: me.lmap[k] = v-j-1
                     #print(k, v, j, v-j-1)
-            if len(me.lmap) ==1: 
+            if len(me.lmap) ==1:
                 me.lmap == None
             me.nmap -= cc
 
@@ -5060,8 +5072,8 @@ To find out which solver will be used for integer programming:
 
 To set options on one of the default solvers, use
     >>> solver(int, ...)
-''' 
-      if solver is None: #here comes help 
+'''
+      if solver is None: #here comes help
           if 'help' in kwds: #e.g. solver(help='simplex')
               print(me._opt_help.get(
                   kwds['help'], 'Invalid solver.'))
@@ -5077,14 +5089,14 @@ To set options on one of the default solvers, use
           if me.verb: print("default solver:", solver)
 
       if solver not in me.opt_kinds:
-          print('Bad solver. Supported solvers are:', 
+          print('Bad solver. Supported solvers are:',
                   ', '.join(me.opt_kinds))
           return
 
       if me.opt_kinds.index(solver) < me.num_lp_solvers:
           me.options['lp solver'] = solver
           if me.verb: print('LP solver is set to', solver)
-      else: 
+      else:
           me.options['mip solver'] = solver
           if me.verb: print('MIP solver is set to', solver)
 
@@ -5117,7 +5129,7 @@ To set options on one of the default solvers, use
 
        for n in opts:
            p = getattr(cp, n, None)
-           if p is None: 
+           if p is None:
                print("Ignored a bad option", n)
                continue
 
@@ -5259,7 +5271,7 @@ glpk.GLP_ESTOP:'''The search was prematurely terminated by application.
        """you can change parameters, then the model will
 rebuild itself before actually solve."""
        ## a point between consecutive comparisons
-       me._last = None 
+       me._last = None
 
        me.update_lazy() #this takes care of rebuilding
 
@@ -5277,7 +5289,7 @@ rebuild itself before actually solve."""
            meth = me.solver(int) #mip method
            cp = me._solver_ctrl(meth)
            method = getattr(me, meth)
-           ri = method(cp) 
+           ri = method(cp)
            ri = me._ret_str[meth][ri]
            me._solved = 'intopt'
            return rv+'\n'+ri if kind is None else ri
@@ -5285,12 +5297,12 @@ rebuild itself before actually solve."""
        print('Error: kind is not one of float, int, None.')
 
    @_globalize
-   def end(me, name=None): 
-       me._last = None 
-       if name is None: 
+   def end(me, name=None):
+       me._last = None
+       if name is None:
            # might not be a serious end
            me.update_lazy()
-       elif name==me.name: 
+       elif name==me.name:
            # an emphetic end
            me.lazy = None
        else:
@@ -5300,7 +5312,7 @@ rebuild itself before actually solve."""
            model._prob_ = None
 
        return me
-       
+
    @_globalize
    def verbose(me, v): me.verb = v
 
@@ -5327,10 +5339,10 @@ GLP_UNDEF | solution is undefined."""
                     if me._solved in ('simplex', 'exact') else
               me.ipt_status() if me._solved == 'interior' else
               me.mip_status())
-       return ret if format is int else me.status_map[ret] 
+       return ret if format is int else me.status_map[ret]
 
    @_globalize
-   def vobj(me): 
+   def vobj(me):
        """value of the objective."""
        return (me.get_obj_val() #simplex and exact
                   if me._solved in ('simplex', 'exact') else
@@ -5395,12 +5407,12 @@ for the other arguments to the function call:
          names = name.split(',')
          idx = me.add_cols(len(names))
          if len(names) == 1:
-             return _var(me, idx, name, kind, bounds) 
-         return [_var(me, idx+i, name.strip(), kind, bounds) 
+             return _var(me, idx, name, kind, bounds)
+         return [_var(me, idx+i, name.strip(), kind, bounds)
                    for i, name in enumerate(names)]
- 
+
       #create many variables as a dict.
-      if type(inds) is int: 
+      if type(inds) is int:
           inds = range(inds)
           vars = [None for i in inds]
       else:
@@ -5410,7 +5422,7 @@ for the other arguments to the function call:
       idx = me.add_cols(len(vars))
       name = name + "[%s]" if name else "X%d[%%s]"%idx
       for t in inds:
-         vars[t] = _var(me, idx, 
+         vars[t] = _var(me, idx,
             name%subscript(t), kind, bounds)
          idx += 1
       return vars
@@ -5427,20 +5439,20 @@ for the other arguments to the function call:
         if the argument name is not provided, will leave name unchanged.
 
     inds(default to None): the index for the constraints, will be
-        used as subscripts to name each individual constraints. 
+        used as subscripts to name each individual constraints.
         If the index set is not provided, index counts from 0.
  """
-      me._last = None 
+      me._last = None
 
       if type(cons) is _var:
           if me.verb: print(cons.name, "bounds:", cons.bounds)
           return None #treat as bound
-      if type(cons) is _cons: 
-          if name: cons.name = name 
+      if type(cons) is _cons:
+          if name: cons.name = name
           if me.verb: print(str(cons))
           return cons
 
-      idx, iit = 0, inds and iter(inds) 
+      idx, iit = 0, inds and iter(inds)
       rets = {} if iit else []
       name = name and name + "[%s]"
       for c in cons:
@@ -5463,7 +5475,7 @@ for the other arguments to the function call:
          expr = +expr #convert to expression
       if type(expr) is not _parex:
          raise Exception("Bad expression.")
-      obj = _obj(me, max, expr, name) 
+      obj = _obj(me, max, expr, name)
       if me.verb: print(obj)
       return obj
 
@@ -5473,27 +5485,27 @@ for the other arguments to the function call:
        return me.get_num_cols()
 
    @_globalize
-   def nint(me): 
+   def nint(me):
       """Get number of integer variables."""
       return me.get_num_int()
 
    @_globalize
-   def nbin(me): 
+   def nbin(me):
       """Get number of binary variables."""
       return me.get_num_bin()
 
    @property
-   def kind (me): 
+   def kind (me):
       return (bool if me.nbin() == me.nvar() else
                 int if me.nint() else #mixed integer problem
                 float) #assert nint >= nbin
 
 
-   class _KKT(object): 
-       def __init__(me, method ): 
+   class _KKT(object):
+       def __init__(me, method ):
            me.method = method
 
-       def convert(me, p): 
+       def convert(me, p):
            'convert row, col index to names'
            pass
 
@@ -5512,9 +5524,9 @@ Largest relative error: %f (row id: %s)
 Largest absolute error: %f (row id: %s)
 Largest relative error: %f (row id: %s)
 """%( res.method,
-      res.pe_aem, res.pe_aei, 
+      res.pe_aem, res.pe_aei,
       res.pe_rem, res.pe_rei,
-      res.pb_aem, res.pb_aei, 
+      res.pb_aem, res.pb_aei,
       res.pb_rem, res.pb_rei,
 ) + ("""
 1) Error for Dual Equality Constraints:
@@ -5526,10 +5538,10 @@ Largest relative error: %f (var id: %s)
 -------------------------------------------
 Largest absolute error: %f (var id: %s)
 Largest relative error: %f (var id: %s)
-"""%( 
-      res.de_aem, res.de_aei, 
+"""%(
+      res.de_aem, res.de_aei,
       res.de_rem, res.de_rei,
-      res.db_aem, res.db_aei, 
+      res.db_aem, res.db_aei,
       res.db_rem, res.db_rei,
     ) if res.dual else '')
 
@@ -5541,11 +5553,11 @@ for more information, try: >>> help(model.check_kkt)"""
       isol = me.opt_kinds.index(me._solved)
       solt = glpk.GLP_SOL if isol <2 else\
             glpk.GLP_IPT if isol ==2 else glpk.GLP_MIP
-      def ptr(t=float, n=1): 
+      def ptr(t=float, n=1):
         return glpk.intArray(n) if t is int else glpk.doubleArray(n)
-      aem, aei, rem, rei = ptr(), ptr(int), ptr(), ptr(int) 
+      aem, aei, rem, rei = ptr(), ptr(int), ptr(), ptr(int)
       def kkt_vals(prefix):
-          cond = getattr(glpk, 'GLP_KKT_'+prefix.upper()) 
+          cond = getattr(glpk, 'GLP_KKT_'+prefix.upper())
           me.check_kkt(solt, cond, aem, aei, rem, rei)
           for attr in ('aem', 'aei', 'rem', 'rei'):
               setattr(res, prefix+'_'+attr, vars()[attr][0])
@@ -5557,8 +5569,8 @@ for more information, try: >>> help(model.check_kkt)"""
         kkt_vals('db')
       return res
 
-   def scale(me, flags=None): 
-      """scale or unscale (without arguments) the problem. 
+   def scale(me, flags=None):
+      """scale or unscale (without arguments) the problem.
 flags: options can be combined
 with the bitwise OR operator and may be the following:
 GLP_SF_GM | perform geometric mean scaling;
@@ -5567,7 +5579,7 @@ GLP_SF_2N | round scale factors to nearest power of two;
 GLP_SF_SKIP | skip scaling, if the problem is well scaled.
 GLP_SF_AUTO | chooses the scaling options automatically.
      """
-      if type(flags) is int: 
+      if type(flags) is int:
          me.scale_prob(flags)
       else: me.unscale_prob()
 
@@ -5576,16 +5588,16 @@ GLP_SF_AUTO | chooses the scaling options automatically.
        '''print the sensitivity report.'''
        from datetime import datetime
        print()
-       print("PyMathProg 1.0 Sensitivity Report Created:", 
+       print("PyMathProg 1.0 Sensitivity Report Created:",
             datetime.now().strftime('%Y/%m/%d %a %H:%M%p'))
        me.coef_ranges()
        me.bound_ranges()
 
    @_globalize
-   def sensitivity(me): 
+   def sensitivity(me):
        '''print the sensitivity report.'''
        me.sensit()
-   
+
    @_globalize
    def coef_ranges(me, cols = None):
       """sensitivity report on objective coeficients.
@@ -5593,22 +5605,22 @@ GLP_SF_AUTO | chooses the scaling options automatically.
              cols(None, iterable or dict): a number of variables.
                   if it is None, report on all variables.
                   if an iterable, report on variables in the iterable.
-                  if a dict, report on variables in the dict by 
+                  if a dict, report on variables in the dict by
                       ignorig the keys.
 """
       map = me._colmap.map
-      if cols is None: 
+      if cols is None:
           n = me.get_num_cols()
           cols = range(1, n+1)
-      elif isinstance (cols, _var): 
+      elif isinstance (cols, _var):
           cols = [map(cols.up.id)]
-      elif isinstance (cols, dict): 
+      elif isinstance (cols, dict):
           cols = [map(c.up.id) for k,c in cols.items()]
-      elif isinstance (cols, list): 
+      elif isinstance (cols, list):
           cols = [map(c.up.id) for c in cols]
       print('===='*20)
       fmt = "%-15s %12s %12s %12s %12s %12s"
-      print(fmt%("Variable", "Activity", "Dual.Value", 
+      print(fmt%("Variable", "Activity", "Dual.Value",
            "Obj.Coef", "Range.From", "Range.Till"))
       print('----'*20)
       fmt = "%s%-14s %12g %12g %12g %12g %12g"
@@ -5625,23 +5637,23 @@ GLP_SF_AUTO | chooses the scaling options automatically.
              rows(None, iterable or dict): a number of variables.
                   if it is None, report on all variables.
                   if an iterable, report on variables in the iterable.
-                  if a dict, report on variables in the dict by 
+                  if a dict, report on variables in the dict by
                       ignorig the keys.
 """
       map = me._rowmap.map
-      if rows is None: 
-          m = me.get_num_rows() 
+      if rows is None:
+          m = me.get_num_rows()
           rows = range(1, m+1)
-      elif isinstance (rows, _cons): 
+      elif isinstance (rows, _cons):
           rows = [map(rows.up.id)]
-      elif isinstance (rows, dict): 
+      elif isinstance (rows, dict):
           rows = [map(c.up.id) for k,c in rows.items()]
-      elif isinstance (rows, list): 
+      elif isinstance (rows, list):
           rows = [map(c.up.id) for c in rows]
       print('===='*20)
       #(name, prim, dual, lb, ub, slack, coef1[0], coef2[0])
       fmt = "%-14s %10s %10s %10s %10s %10s %10s"
-      print(fmt%("Constraint", "Activity", "Dual.Value", 
+      print(fmt%("Constraint", "Activity", "Dual.Value",
            "Lower.Bnd", "Upper.Bnd", "RangeLower", "RangeUpper"))
       print('----'*20)
       fmt = "%s%-13s %10g %10g %10g %10g %10g %10g"
@@ -5649,15 +5661,15 @@ GLP_SF_AUTO | chooses the scaling options automatically.
       print('===='*20)
       if me.verb: print(
 '''Note: normally, RangeLower is the min for the binding bound, and RangeUpper
-gives the max value. However, when neither bounds are binding, the row is 
-marked with a *, and RangeLower is the max for Lower.Bnd(whose min is -inf), 
-and RangeUpper is the min for Upper.Bnd(whose max value is inf). Then the 
+gives the max value. However, when neither bounds are binding, the row is
+marked with a *, and RangeLower is the max for Lower.Bnd(whose min is -inf),
+and RangeUpper is the min for Upper.Bnd(whose max value is inf). Then the
 columns of RangeLower, RangeUpper and Activity all have identical values.
 ''')
 
    def _viter(me, idx): #varialbes
       '''iterate over a set of raw index for variables.'''
-      m = me.get_num_rows() 
+      m = me.get_num_rows()
       coef1 = glpk.doubleArray(1) #min
       var1 = glpk.intArray(1)
       val1 = glpk.doubleArray(1)
@@ -5675,7 +5687,7 @@ columns of RangeLower, RangeUpper and Activity all have identical values.
         dual = me._get_col_dual(k)
         coef = me._get_obj_coef(k)
         if stat == glpk.GLP_BS:
-            me.analyze_coef(m+k, coef1, var1, val1, 
+            me.analyze_coef(m+k, coef1, var1, val1,
                            coef2, var2, val2)
         elif stat == glpk.GLP_NF:
             coef1[0] = coef2[0] = coef
@@ -5706,11 +5718,11 @@ columns of RangeLower, RangeUpper and Activity all have identical values.
         dual = me._get_row_dual(k)
         coef = 0.
         lb = me.get_row_lb(k)
-        lb = lb if lb > -fmax else ninf 
+        lb = lb if lb > -fmax else ninf
         ub = me.get_row_ub(k)
-        ub = ub if ub <  fmax else pinf 
+        ub = ub if ub <  fmax else pinf
         if stat == glpk.GLP_BS:
-            # trivial case for row bounds 
+            # trivial case for row bounds
             val1[0] = prim #upper bound for lower.bnd
             val2[0] = prim #lower bound for upper.bnd
             #val1[0] = ninf if ub is pinf else prim
@@ -5729,7 +5741,7 @@ columns of RangeLower, RangeUpper and Activity all have identical values.
     on which of the format keywords are used.  Note that one may
     specify multiple format and filename pairs to write multiple
     types and formats of data in one call to this function.
-    
+
     mps       -- For problem data in the fixed MPS format.
     clp       -- Problem data in the CPLEX LP format.
     glp       -- Problem data in the GNU LP format.
@@ -5787,7 +5799,7 @@ columns of RangeLower, RangeUpper and Activity all have identical values.
 def begin(name):
     return model(name, as_global=True)
 
-def beginModel(name): 
+def beginModel(name):
     print("beginModel(.) is deprecated. Use model(.) instead.")
     return model(name, as_global=True)
 
@@ -5820,4 +5832,3 @@ del code, sys
 ##      print(getattr(_self_, name))
 ##      print(wrapper)
 ##   globals()[name] = wrapper
-

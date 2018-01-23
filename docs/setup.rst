@@ -12,26 +12,29 @@ just open a terminal and issue this command:
 
 .. prompt:: bash
 
-   pip install pymprog
+   python -m pip install pymprog
 
 That's all you need to do and in just a few
 seconds you are all set! It already takes care
 of installing swiglpk to use GLPK within python.
 Note that on Windows you might need the privilage 
-of an administrator to install it,
+of an administrator to install it 
+(start menu --> in the search box type in 'cmd' 
+--> right click on the dos icon --> click 'run as admininstrator'),
 and on Linux or Mac OSX, you may need to use sudo
 to acquire super user privilage to install something:
 
 .. prompt:: bash
 
-   sudo pip install pymprog
+   sudo python -m pip install pymprog
 
 In case pip is not installed on your system,
-you may try this(use sudo if necessary):
+you may try this(use sudo if necessary, or on 
+windows try to run as administrator):
 
 .. prompt:: bash
 
-   easy_install pip
+   python -m easy_install pip
 
 It is the same simple way to setup PyMathProg
 on all operating systems
