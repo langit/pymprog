@@ -5075,7 +5075,7 @@ To set options on one of the default solvers, use
 '''
       if solver is None: #here comes help
           if 'help' in kwds: #e.g. solver(help='simplex')
-              print(me._opt_help.get(
+              return print(me._opt_help.get(
                   kwds['help'], 'Invalid solver.'))
           else: return 'Invalid call. Use help(solver) for help.'
 
