@@ -5267,9 +5267,12 @@ glpk.GLP_ESTOP:'''The search was prematurely terminated by application.
                }
            }
    @_globalize
-   def solve(me, kind = None):
+   def solve(me, kind = None, **opts):
        """you can change parameters, then the model will
-rebuild itself before actually solve."""
+rebuild itself before actually solve.
+you may also provide solver options here, which overrides
+the options set via solver(...). for more info on solver 
+options, see the help info of solver(...)."""
        ## a point between consecutive comparisons
        me._last = None
 
@@ -5278,6 +5281,18 @@ rebuild itself before actually solve."""
        if kind is float or kind is None:
            meth = me.solver(float) #lp method
            cp = me._solver_ctrl(meth)
+
+           for n in opts:
+              p = getattr(cp, n, None)
+              if p is None:
+                 #print("Ignored a bad option", n)
+                 continue
+
+              pv = opts[n]
+              if type(p) != type(pv):
+                 pv = type(p)(opts[p]) #convertion
+              setattr(cp, n, pv)
+
            method = getattr(me, meth)
            rv = method(cp)
            rv = me._ret_str[meth][rv]
@@ -5288,6 +5303,18 @@ rebuild itself before actually solve."""
            if not me.nint(): return
            meth = me.solver(int) #mip method
            cp = me._solver_ctrl(meth)
+
+           for n in opts:
+              p = getattr(cp, n, None)
+              if p is None:
+                 #print("Ignored a bad option", n)
+                 continue
+
+              pv = opts[n]
+              if type(p) != type(pv):
+                 pv = type(p)(opts[p]) #convertion
+              setattr(cp, n, pv)
+
            method = getattr(me, meth)
            ri = method(cp)
            ri = me._ret_str[meth][ri]
