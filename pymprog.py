@@ -207,9 +207,6 @@ all previous bounds are lost.'''
 class _bnds(object): # as updater
    'class for bound management.'
    def addbounds(me, lo, hi, merge):
-      for i in (lo, hi): assert isConst(i)
-      gut=lambda x: x.up if isinstance(x, _math) else x
-      lo, hi = gut(lo), gut(hi)
       if not merge or not me.blist:
           me.blist.append((lo, hi))
           return # the simple way
@@ -386,6 +383,9 @@ class _cons(_guard):
     def boundby(me, lo, hi): #constrain
         '''assume this is always called when adding
 another bound in continuous comparisons.'''
+        for i in (lo, hi): assert isConst(i)
+        gut=lambda x: x.up if isinstance(x, _math) else x
+        lo, hi = gut(lo), gut(hi)
         me.up.addbounds(lo, hi, True) #merge to prev
         #me.up.update_bounds(me.m)
         me.update(False)
@@ -704,6 +704,9 @@ the result is: A1 <= x <= B2
 
    def boundby(me, lo, hi, merge): # add bounds to _var
         if merge: me.used() # don't register as last comparison
+        for i in (lo, hi): assert isConst(i)
+        gut=lambda x: x.up if isinstance(x, _math) else x
+        lo, hi = gut(lo), gut(hi)
         me.up.addbounds(lo, hi, merge)
         me.update(False)
         me.listen2(lo)
