@@ -5298,9 +5298,9 @@ options, see the help info of solver(...)."""
 
            method = getattr(me, meth)
            rv = method(cp)
-           rv = me._ret_str[meth][rv]
+           rvs = me._ret_str[meth][rv]
            me._solved = meth
-           if kind is float: return rv
+           if kind is float: return rv, rvs
 
        if kind is int or kind is None:
            if not me.nint(): return
@@ -5320,9 +5320,10 @@ options, see the help info of solver(...)."""
 
            method = getattr(me, meth)
            ri = method(cp)
-           ri = me._ret_str[meth][ri]
+           ris = me._ret_str[meth][ri]
            me._solved = 'intopt'
-           return rv+'\n'+ri if kind is None else ri
+           return (rv, rvs, ri, ris
+                  ) if kind is None else (ri, ris)
 
        print('Error: kind is not one of float, int, None.')
 
@@ -5355,7 +5356,7 @@ glpk.GLP_UNBND : 'problem has unbounded solution',
 glpk.GLP_UNDEF : 'solution is undefined'
    }
    @_globalize
-   def status(me, format=None):
+   def status(me, format=int):
        """The routine glp_get_status reports the generic status of the
 current basic solution for the specified problem object as follows:
 
