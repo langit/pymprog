@@ -27,7 +27,7 @@
 #from __future__ import division #since 2.2
 from __future__ import print_function
 
-mprog_version = '1.1.1'
+my_version = '1.1.2'
 
 #from past.builtins import long
 import sys
@@ -635,13 +635,16 @@ for that client. if the dict holds a weakref, that'd be good.
 
    spid = 0
    @classmethod
-   def par(me, name, val=0):
+   def par(me, name, *val):
       '''Creating parameters according to the
 index scheme of the value argument.
 
 Arguments:
 
 name(required): a str for the name of the parameter(s).
+     note: like the var(...) function, it can be
+           a comma seperated list of several names,
+           with values provided in the same order.
 
 val(default 0): may take the following types of values:
 
@@ -662,8 +665,16 @@ val(default 0): may take the following types of values:
             _param.spid += 1
             name = "P%d"% _param.spid
       assert name # non-empty
+      if ',' in name:
+           names = name.split(',')
+           return [me.par(name.strip(), 
+                      val[i] if i<len(val) else 0)
+                   for i, name in enumerate(names)]
+
+      assert len(val) <= 1
+      val = val[0] if val else 0
       if type(val) in (int, long, float):
-         return _param( name, val )
+         return _param(name, val )
       if type(val) in (list, tuple):
          return [me.par("%s[%d]"%(name, i), v) for
            i,v in enumerate(val)]
@@ -5322,8 +5333,7 @@ options, see the help info of solver(...)."""
            ri = method(cp)
            ris = me._ret_str[meth][ri]
            me._solved = 'intopt'
-           return (rv, rvs, ri, ris
-                  ) if kind is None else (ri, ris)
+           return ri, ris
 
        print('Error: kind is not one of float, int, None.')
 

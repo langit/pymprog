@@ -10,7 +10,7 @@ with open('README.rst') as readme:
     ld = readme.read()
 
 setup(name = 'pymprog',
-      version = '1.1.1',
+      version = '1.1.2',
       description = 'An easy and flexible mathematical programming environment for Python',
       long_description = ld,
       author = 'Yingjie Lan',
@@ -29,6 +29,6 @@ setup(name = 'pymprog',
     #'Operating System :: Platform Independent',
     'Topic :: Scientific/Engineering :: Mathematics'],
       py_modules=['pymprog'], #to include ./pymprog.py
-      install_requires=['swiglpk >= 1.3.3'], # install it automatically?
+      install_requires=['swiglpk >= 1.4.4'], # install it automatically?
 )
 

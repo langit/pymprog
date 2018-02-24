@@ -66,6 +66,14 @@ The cool thing about it is that it is recursive:
 >>> R[1]
 (R[1]:5)
 
+Finally, you may define several parameters in one call:
+
+>>> par('x, y', 3, 5)
+[(x:3), (y:5)]
+>>> a, b, c = par('a,b,c', 3, (5,2))
+>>> a, b, c
+((a:3), [(b[0]:5), (b[1]:2)], (c:0))
+
 Folks, that's pretty much there is to it! 
 
 
