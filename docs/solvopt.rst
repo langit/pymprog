@@ -56,7 +56,11 @@ To set options on one of the default solvers, for example, use
 
 to select the hybrid pseudo-cost heuristic(PCH) 
 branching technique for the integer optimizer.
-
+These options will be used when you call the solve()
+funtion/method. Note that you may also provide such
+options as keyword arguments to the solve() function/method,
+which will take precedence over the options you set in
+the solver(...) call.
 
 
 .. _delopts:
