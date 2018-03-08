@@ -141,3 +141,6 @@ won't be fully supported in futre versions. Here is a list of them:
 - beginModel(.) is simplified into begin(.)
 - endModel(.) is simplified into end(.)
 
+If you used really old PyMathProg, you might need to be aware that
+the default bounds for variables created by var(...) is non-negative,
+instead of being unbounded, as pointed out by Julia Helmecke on sourceforge.
