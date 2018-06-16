@@ -37,7 +37,7 @@ Assuming you already have Python 2 or Python 3 installed, now open a
 terminal window (also known as a command window), and type in this 
 line of command and hit return::
 
-    pip install pymprog
+    python -m pip install pymprog
 
 That's it. Since it is a pure Python project that only depends on swiglpk,
 it can be installed this way wherever swiglpk can be installed.
